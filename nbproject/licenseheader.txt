@@ -1,0 +1,25 @@
+<#if licenseFirst??>
+${licenseFirst}
+</#if>
+${licensePrefix}This is free and unencumbered software released into the public domain.
+${licensePrefix?replace(" +$","","r")}
+${licensePrefix}Anyone is free to copy, modify, publish, use, compile, sell, or distribute
+${licensePrefix}this software, either in source code form or as a compiled binary, for any
+${licensePrefix}purpose, commercial or non-commercial, and by any means.
+${licensePrefix?replace(" +$","","r")}
+${licensePrefix}In jurisdictions that recognize copyright laws, the author or authors of this
+${licensePrefix}software dedicate any and all copyright interest in the software to the
+${licensePrefix}public domain. We make this dedication for the benefit of the public at large
+${licensePrefix}and to the detriment of our heirs and successors. We intend this dedication
+${licensePrefix}to be an overt act of relinquishment in perpetuity of all present and future
+${licensePrefix}rights to this software under copyright law.
+${licensePrefix?replace(" +$","","r")}
+${licensePrefix}THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+${licensePrefix}IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+${licensePrefix}FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+${licensePrefix}AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+${licensePrefix}ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+${licensePrefix}WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+<#if licenseLast??>
+${licenseLast}
+</#if>

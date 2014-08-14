@@ -39,6 +39,7 @@ import org.junit.Ignore;
  * @author Ruben Dulek
  * @version 1.0
  */
+@Ignore
 public class ArraySetTest {
 	/**
 	 * The number of times the test cases are repeated.
@@ -77,7 +78,7 @@ public class ArraySetTest {
 	 * Test of adding elements. Tests adding of elements to a set without
 	 * specifying the correct initial capacity, so this also tests the resizing.
 	 */
-	//@Ignore
+	@Ignore
 	@Test
 	public void testAdd() {
 		ArraySet<Integer> me = new ArraySet<>();
@@ -128,7 +129,7 @@ public class ArraySetTest {
 	 * Test of adding elements. Tests adding of elements to a set and specifying
 	 * the correct initial capacity.
 	 */
-	//@Ignore
+	@Ignore
 	@Test
 	public void testAdd2() {
 		ArraySet<Integer> me = new ArraySet<>(testSize);
@@ -178,7 +179,7 @@ public class ArraySetTest {
 	/**
 	 * Tests adding collections to the set.
 	 */
-	//@Ignore
+	@Ignore
 	@Test
 	public void testAddAll() {
 		ArraySet<Integer> me = new ArraySet<>(testSize);
@@ -222,7 +223,7 @@ public class ArraySetTest {
 	/**
 	 * Tests clearing the sets of all elements.
 	 */
-	//@Ignore
+	@Ignore
 	@Test
 	public void testClear() {
 		ArraySet<Integer> me = new ArraySet<>(randomTest);
@@ -266,7 +267,7 @@ public class ArraySetTest {
 	/**
 	 * Tests making a clone of the set.
 	 */
-	//@Ignore
+	@Ignore
 	@SuppressWarnings("unchecked") //Caused by casting the cloned HashSet back to HashSet.
 	@Test
 	public void testClone() {
@@ -309,7 +310,7 @@ public class ArraySetTest {
 	/**
 	 * Tests checking the set for containment of elements.
 	 */
-	//@Ignore
+	@Ignore
 	@Test
 	public void testContains() {
 		ArraySet<Integer> me = new ArraySet<>(randomTest);
@@ -358,7 +359,7 @@ public class ArraySetTest {
 	/**
 	 * Tests checking the set for containment of subsets.
 	 */
-	//@Ignore
+	@Ignore
 	@Test
 	public void testContainsAll() {
 		ArraySet<Integer> me = new ArraySet<>(randomTest);
@@ -398,7 +399,7 @@ public class ArraySetTest {
 	/**
 	 * Tests computing the hash code of sets.
 	 */
-	//@Ignore
+	@Ignore
 	@Test
 	public void testHashCode() {
 		ArraySet<Integer> me = new ArraySet<>(randomTest);
@@ -438,7 +439,7 @@ public class ArraySetTest {
 	/**
 	 * Tests running through the iterator of the sets.
 	 */
-	//@Ignore
+	@Ignore
 	@Test
 	public void testIterator() {
 		ArraySet<Integer> me = new ArraySet<>(randomTest);
@@ -496,7 +497,7 @@ public class ArraySetTest {
 	/**
 	 * Tests removing elements from the sets.
 	 */
-	//@Ignore
+	@Ignore
 	@Test
 	public void testRemove() {
 		ArraySet<Integer> me = new ArraySet<>(randomTest);
@@ -546,7 +547,7 @@ public class ArraySetTest {
 	/**
 	 * Tests removing subsets from the sets.
 	 */
-	//@Ignore
+	@Ignore
 	@Test
 	public void testRemoveAll() {
 		ArraySet<Integer> me = new ArraySet<>(randomTest);
@@ -591,7 +592,7 @@ public class ArraySetTest {
 	/**
 	 * Tests retaining subsets of the sets.
 	 */
-	//@Ignore
+	@Ignore
 	@Test
 	public void testRetainAll() {
 		ArraySet<Integer> me = new ArraySet<>(randomTest);
@@ -636,7 +637,7 @@ public class ArraySetTest {
 	/**
 	 * Tests listing all elements of the set into an array.
 	 */
-	//@Ignore
+	@Ignore
 	@Test
 	public void testToArray() {
 		ArraySet<Integer> me = new ArraySet<>(randomTest);
@@ -682,7 +683,7 @@ public class ArraySetTest {
 	 * version of {@link ArraySet#toArray} will be used, but an empty array is
 	 * provided (so the set will have to allocate a new array).
 	 */
-	//@Ignore
+	@Ignore
 	@Test
 	public void testToArrayGeneric() {
 		ArraySet<Integer> me = new ArraySet<>(randomTest);
@@ -728,7 +729,7 @@ public class ArraySetTest {
 	 * version of {@link ArraySet#toArray} will be used, and the array provided
 	 * will have sufficient size so that no new array need be allocated.
 	 */
-	//@Ignore
+	@Ignore
 	@Test
 	public void testToArrayGenericSized() {
 		ArraySet<Integer> me = new ArraySet<>(randomTest);

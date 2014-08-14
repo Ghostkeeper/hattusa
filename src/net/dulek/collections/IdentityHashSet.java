@@ -222,7 +222,7 @@ public class IdentityHashSet<E> extends HashSet<E> {
 		}
 		final int tMax = table.length - 1;
 		//Compute the desired bucket for the element.
-		int index = System.identityHashCode(object); //Keep only the lower bits (length - 1 has all bits on, since length is a power of 2). Same as modulo length.
+		int index = System.identityHashCode(object) & tMax; //Keep only the lower bits (length - 1 has all bits on, since length is a power of 2). Same as modulo length.
 
 		int offset = 1; //By how much we must grow the index while searching. Index grows quadratically.
 		Object elem;

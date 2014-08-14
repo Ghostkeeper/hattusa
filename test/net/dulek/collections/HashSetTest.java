@@ -37,6 +37,7 @@ import org.junit.Ignore;
  * @author Ruben Dulek
  * @version 1.0
  */
+@Ignore
 public class HashSetTest {
 	/**
 	 * Number of times to repeat the tests.
