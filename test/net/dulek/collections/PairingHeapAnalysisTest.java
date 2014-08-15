@@ -689,11 +689,11 @@ public class PairingHeapAnalysisTest {
 			for(int r = 0;r < repeats;r++) {
 				final PairingHeap<Double,String> heap = pairingHeap(size);
 				System.gc();
-				int i = sizeIncrement - 1;
 				double[] keys = new double[sizeIncrement];
 				for(int j = sizeIncrement - 1;j >= 0;j--) { //Pre-generate the keys too.
 					keys[j] = rng.nextDouble();
 				}
+				int i = sizeIncrement - 1;
 				spin();
 				final long before = System.nanoTime();
 				for(;i >= 0;i--) {
