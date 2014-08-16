@@ -926,9 +926,13 @@ public class PairingHeap<K,V> implements Iterable<PairingHeap<K,V>.Element>,Seri
 	 * <p>This method takes {@code O(1)} time. The two roots are simply merged
 	 * and the specified heap will be cleared.</p>
 	 * @param other The heap to merge into this one.
+	 * @throws IllegalArgumentException Trying to merge this heap with itself.
 	 * @throws NullPointerException The specified heap is {@code null}.
 	 */
 	public void merge(final PairingHeap<K,V> other) {
+		if(other == this) { //We're merging with ourselves?
+			throw new IllegalArgumentException("Merging PairingHeap with itself.");
+		}
 		modCount++; //We'll make some big changes.
 		if(other.root == null) { //The specified heap may be empty.
 			return; //Then we won't need to do anything!
