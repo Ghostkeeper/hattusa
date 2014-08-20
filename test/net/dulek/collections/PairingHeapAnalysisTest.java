@@ -38,7 +38,7 @@ public class PairingHeapAnalysisTest {
 	/**
 	 * The size of the largest tests to try.
 	 */
-	private final int maxSize = 10_000;
+	private final int maxSize = 1_000_000;
 
 	/**
 	 * The file the test results should be written to.
@@ -97,7 +97,7 @@ public class PairingHeapAnalysisTest {
 		prepare();
 		try {
 			//All the tests to conduct.
-			changeKeyPairingHeap();
+			/*changeKeyPairingHeap();
 			changeKeyPriorityQueue();
 			clearPairingHeap();
 			clearPriorityQueue();
@@ -117,10 +117,10 @@ public class PairingHeapAnalysisTest {
 			valuesPairingHeap();
 			entrySetPriorityQueue();
 			findMinPairingHeap();
-			findMinPriorityQueue();
+			findMinPriorityQueue();*/
 			insertPairingHeap();
 			insertPriorityQueue();
-			isEmptyPairingHeap();
+			/*isEmptyPairingHeap();
 			isEmptyPriorityQueue();
 			iteratorPairingHeap();
 			iteratorSortedPairingHeap();
@@ -130,7 +130,13 @@ public class PairingHeapAnalysisTest {
 			sizePairingHeap();
 			sizePriorityQueue();
 			toArrayPairingHeap();
-			toArrayPriorityQueue();
+			toArrayPriorityQueue();*/
+			dijkstraSparsePairingHeap();
+			dijkstraSparsePriorityQueue();
+			dijkstraMediumPairingHeap();
+			dijkstraMediumPriorityQueue();
+			dijkstraDensePairingHeap();
+			dijkstraDensePriorityQueue();
 		} catch(final Exception e) { //Catches all exceptions (such as out of memory) and writes intermediate results to the file.
 			e.printStackTrace();
 			writeToFile();
@@ -576,6 +582,323 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("DeleteMin PriorityQueue");
+	}
+
+	/**
+	 * Tests the {@code PairingHeap} on multiple attributes at once by
+	 * performing Dijkstra's Algorithm for shortest paths on random graphs. The
+	 * graphs will be sparse in this case. Every vertex is connected to
+	 * {@code 0.5n} other vertices (asymetrically). Dijkstra's algorithm will
+	 * compute the shortest paths from a random vertex to every other vertex in
+	 * the graph (single-source, multiple-destination).
+	 * <p>This test will analyse the efficiency of the heap mostly on the
+	 * efficiency of its {@code insert} and {@code deleteMin} methods, but also
+	 * a bit on the {@code decreaseKey} method.</p>
+	 */
+	private void dijkstraDensePairingHeap() {
+		final double[] result = new double[maxSize / sizeIncrement];
+		for(int size = sizeIncrement;size < maxSize;size += sizeIncrement) {
+			long time = 0;
+			for(int r = 0;r < repeats;r++) {
+				final PairingHeap<Double,Vertex> heap = new PairingHeap<>();
+				final Vertex[] graph = graph(size,size >> 1);
+				final Vertex start = graph[rng.nextInt(size)]; //Pick a random starting vertex.
+				System.gc();
+				spin();
+				final long before = System.nanoTime();
+				start.element = heap.insert(0.0,start); //Distance to starting vertex is zero.
+				while(!heap.isEmpty()) {
+					final PairingHeap<Double,Vertex>.Element current = heap.deleteMin();
+					//Here is where you would report the distance to the vertex (current.getKey()).
+					final double distance = current.getKey();
+					final Vertex currentVertex = current.getValue();
+					final Vertex[] neighbours = currentVertex.neighbours;
+					final double[] neighbourDistances = currentVertex.neighbourDistances;
+					for(int i = neighbours.length - 1;i >= 0;i--) {
+						final Vertex neighbour = neighbours[i];
+						final double neighbourDistance = neighbourDistances[i];
+						final PairingHeap<Double,Vertex>.Element neighbourElement = neighbour.element;
+						if(neighbourElement == null) { //Haven't seen this vertex yet.
+							neighbour.element = heap.insert(distance + neighbourDistance,neighbour);
+						} else { //Already seen it. Only need to decrease the key, perhaps.
+							if(distance + neighbourDistance < neighbourElement.getKey()) {
+								heap.decreaseKey(neighbourElement,distance + neighbourDistance);
+							}
+						}
+					}
+				}
+				final long after = System.nanoTime();
+				time += after - before;
+			}
+			result[size / sizeIncrement] = (double)time / repeats;
+			System.out.println("PairingHeap(" + size + ") Dijkstra dense: " + ((double)time / repeats));
+		}
+		results.add(result);
+		resultsHeaders.add("DijkstraDense PairingHeap");
+	}
+
+	/**
+	 * Tests the {@code PriorityQueue} on multiple attributes at once by
+	 * performing Dijkstra's Algorithm for shortest paths on random graphs. The
+	 * graphs will be sparse in this case. Every vertex is connected to
+	 * {@code 0.5n} other vertices (asymetrically). Dijkstra's algorithm will
+	 * compute the shortest paths from a random vertex to every other vertex in
+	 * the graph (single-source, multiple-destination).
+	 * <p>This test will analyse the efficiency of the heap mostly on the
+	 * efficiency of its {@code insert} and {@code deleteMin} methods. Since the
+	 * {@code PriorityQueue} has no {@code decreaseKey} method, this algorithm
+	 * simply adds a new element every time a key needs decreasing.</p>
+	 */
+	private void dijkstraDensePriorityQueue() {
+		final double[] result = new double[maxSize / sizeIncrement];
+		for(int size = sizeIncrement;size < maxSize;size += sizeIncrement) {
+			long time = 0;
+			for(int r = 0;r < repeats;r++) {
+				final PriorityQueue<VertexElem> heap = new PriorityQueue<>();
+				final PriorityQueueVertex[] graph = priorityQueueGraph(size,size >> 1);
+				final PriorityQueueVertex start = graph[rng.nextInt(size)]; //Pick a random starting vertex.
+				System.gc();
+				spin();
+				final long before = System.nanoTime();
+				heap.add(new VertexElem(0.0,start)); //Distance to starting vertex is zero.
+				while(!heap.isEmpty()) {
+					final VertexElem current = heap.poll();
+					current.value.visited = true;
+					//Here is where you would report the distance to the vertex (current.getKey()).
+					final double distance = current.key;
+					final PriorityQueueVertex currentVertex = current.value;
+					final PriorityQueueVertex[] neighbours = currentVertex.neighbours;
+					final double[] neighbourDistances = currentVertex.neighbourDistances;
+					for(int i = neighbours.length - 1;i >= 0;i--) {
+						final PriorityQueueVertex neighbour = neighbours[i];
+						final double neighbourDistance = neighbourDistances[i];
+						final VertexElem neighbourElement = neighbour.element;
+						if(!neighbour.visited && (neighbourElement == null || distance + neighbourDistance < neighbourElement.key)) { //Haven't visited this vertex yet.
+							final VertexElem elem = new VertexElem(distance + neighbourDistance,neighbour);
+							neighbour.element = elem;
+							heap.add(elem);
+						}
+					}
+				}
+				final long after = System.nanoTime();
+				time += after - before;
+			}
+			result[size / sizeIncrement] = (double)time / repeats;
+			System.out.println("PriorityQueue(" + size + ") Dijkstra dense: " + ((double)time / repeats));
+		}
+		results.add(result);
+		resultsHeaders.add("DijkstraDense PriorityQueue");
+	}
+
+	/**
+	 * Tests the {@code PairingHeap} on multiple attributes at once by
+	 * performing Dijkstra's Algorithm for shortest paths on random graphs. The
+	 * graphs will be sparse in this case. Every vertex is connected to
+	 * {@code sqrt(n)} other vertices (asymetrically). Dijkstra's algorithm will
+	 * compute the shortest paths from a random vertex to every other vertex in
+	 * the graph (single-source, multiple-destination).
+	 * <p>This test will analyse the efficiency of the heap mostly on the
+	 * efficiency of its {@code insert} and {@code deleteMin} methods, but also
+	 * a bit on the {@code decreaseKey} method.</p>
+	 */
+	private void dijkstraMediumPairingHeap() {
+		final double[] result = new double[maxSize / sizeIncrement];
+		for(int size = sizeIncrement;size < maxSize;size += sizeIncrement) {
+			long time = 0;
+			for(int r = 0;r < repeats;r++) {
+				final PairingHeap<Double,Vertex> heap = new PairingHeap<>();
+				final Vertex[] graph = graph(size,(int)Math.sqrt(size));
+				final Vertex start = graph[rng.nextInt(size)]; //Pick a random starting vertex.
+				System.gc();
+				spin();
+				final long before = System.nanoTime();
+				start.element = heap.insert(0.0,start); //Distance to starting vertex is zero.
+				while(!heap.isEmpty()) {
+					final PairingHeap<Double,Vertex>.Element current = heap.deleteMin();
+					//Here is where you would report the distance to the vertex (current.getKey()).
+					final double distance = current.getKey();
+					final Vertex currentVertex = current.getValue();
+					final Vertex[] neighbours = currentVertex.neighbours;
+					final double[] neighbourDistances = currentVertex.neighbourDistances;
+					for(int i = neighbours.length - 1;i >= 0;i--) {
+						final Vertex neighbour = neighbours[i];
+						final double neighbourDistance = neighbourDistances[i];
+						final PairingHeap<Double,Vertex>.Element neighbourElement = neighbour.element;
+						if(neighbourElement == null) { //Haven't seen this vertex yet.
+							neighbour.element = heap.insert(distance + neighbourDistance,neighbour);
+						} else { //Already seen it. Only need to decrease the key, perhaps.
+							if(distance + neighbourDistance < neighbourElement.getKey()) {
+								heap.decreaseKey(neighbourElement,distance + neighbourDistance);
+							}
+						}
+					}
+				}
+				final long after = System.nanoTime();
+				time += after - before;
+			}
+			result[size / sizeIncrement] = (double)time / repeats;
+			System.out.println("PairingHeap(" + size + ") Dijkstra medium: " + ((double)time / repeats));
+		}
+		results.add(result);
+		resultsHeaders.add("DijkstraMedium PairingHeap");
+	}
+
+	/**
+	 * Tests the {@code PriorityQueue} on multiple attributes at once by
+	 * performing Dijkstra's Algorithm for shortest paths on random graphs. The
+	 * graphs will be sparse in this case. Every vertex is connected to
+	 * {@code sqrt(n)} other vertices (asymetrically). Dijkstra's algorithm will
+	 * compute the shortest paths from a random vertex to every other vertex in
+	 * the graph (single-source, multiple-destination).
+	 * <p>This test will analyse the efficiency of the heap mostly on the
+	 * efficiency of its {@code insert} and {@code deleteMin} methods. Since the
+	 * {@code PriorityQueue} has no {@code decreaseKey} method, this algorithm
+	 * simply adds a new element every time a key needs decreasing.</p>
+	 */
+	private void dijkstraMediumPriorityQueue() {
+		final double[] result = new double[maxSize / sizeIncrement];
+		for(int size = sizeIncrement;size < maxSize;size += sizeIncrement) {
+			long time = 0;
+			for(int r = 0;r < repeats;r++) {
+				final PriorityQueue<VertexElem> heap = new PriorityQueue<>();
+				final PriorityQueueVertex[] graph = priorityQueueGraph(size,(int)Math.sqrt(size));
+				final PriorityQueueVertex start = graph[rng.nextInt(size)]; //Pick a random starting vertex.
+				System.gc();
+				spin();
+				final long before = System.nanoTime();
+				heap.add(new VertexElem(0.0,start)); //Distance to starting vertex is zero.
+				while(!heap.isEmpty()) {
+					final VertexElem current = heap.poll();
+					current.value.visited = true;
+					//Here is where you would report the distance to the vertex (current.getKey()).
+					final double distance = current.key;
+					final PriorityQueueVertex currentVertex = current.value;
+					final PriorityQueueVertex[] neighbours = currentVertex.neighbours;
+					final double[] neighbourDistances = currentVertex.neighbourDistances;
+					for(int i = neighbours.length - 1;i >= 0;i--) {
+						final PriorityQueueVertex neighbour = neighbours[i];
+						final double neighbourDistance = neighbourDistances[i];
+						final VertexElem neighbourElement = neighbour.element;
+						if(!neighbour.visited && (neighbourElement == null || distance + neighbourDistance < neighbourElement.key)) { //Haven't visited this vertex yet.
+							final VertexElem elem = new VertexElem(distance + neighbourDistance,neighbour);
+							neighbour.element = elem;
+							heap.add(elem);
+						}
+					}
+				}
+				final long after = System.nanoTime();
+				time += after - before;
+			}
+			result[size / sizeIncrement] = (double)time / repeats;
+			System.out.println("PriorityQueue(" + size + ") Dijkstra medium: " + ((double)time / repeats));
+		}
+		results.add(result);
+		resultsHeaders.add("DijkstraMedium PriorityQueue");
+	}
+
+	/**
+	 * Tests the {@code PairingHeap} on multiple attributes at once by
+	 * performing Dijkstra's Algorithm for shortest paths on random graphs. The
+	 * graphs will be sparse in this case. Every vertex is connected to
+	 * {@code 10} other vertices (asymetrically). Dijkstra's algorithm will
+	 * compute the shortest paths from a random vertex to every other vertex in
+	 * the graph (single-source, multiple-destination).
+	 * <p>This test will analyse the efficiency of the heap mostly on the
+	 * efficiency of its {@code insert} and {@code deleteMin} methods.</p>
+	 */
+	private void dijkstraSparsePairingHeap() {
+		final double[] result = new double[maxSize / sizeIncrement];
+		for(int size = sizeIncrement;size < maxSize;size += sizeIncrement) {
+			long time = 0;
+			for(int r = 0;r < repeats;r++) {
+				final PairingHeap<Double,Vertex> heap = new PairingHeap<>();
+				final Vertex[] graph = graph(size,10);
+				final Vertex start = graph[rng.nextInt(size)]; //Pick a random starting vertex.
+				System.gc();
+				spin();
+				final long before = System.nanoTime();
+				start.element = heap.insert(0.0,start); //Distance to starting vertex is zero.
+				while(!heap.isEmpty()) {
+					final PairingHeap<Double,Vertex>.Element current = heap.deleteMin();
+					//Here is where you would report the distance to the vertex (current.getKey()).
+					final double distance = current.getKey();
+					final Vertex currentVertex = current.getValue();
+					final Vertex[] neighbours = currentVertex.neighbours;
+					final double[] neighbourDistances = currentVertex.neighbourDistances;
+					for(int i = neighbours.length - 1;i >= 0;i--) {
+						final Vertex neighbour = neighbours[i];
+						final double neighbourDistance = neighbourDistances[i];
+						final PairingHeap<Double,Vertex>.Element neighbourElement = neighbour.element;
+						if(neighbourElement == null) { //Haven't seen this vertex yet.
+							neighbour.element = heap.insert(distance + neighbourDistance,neighbour);
+						} else { //Already seen it. Only need to decrease the key, perhaps.
+							if(distance + neighbourDistance < neighbourElement.getKey()) {
+								heap.decreaseKey(neighbourElement,distance + neighbourDistance);
+							}
+						}
+					}
+				}
+				final long after = System.nanoTime();
+				time += after - before;
+			}
+			result[size / sizeIncrement] = (double)time / repeats;
+			System.out.println("PairingHeap(" + size + ") Dijkstra sparse: " + ((double)time / repeats));
+		}
+		results.add(result);
+		resultsHeaders.add("DijkstraSparse PairingHeap");
+	}
+
+	/**
+	 * Tests the {@code PriorityQueue} on multiple attributes at once by
+	 * performing Dijkstra's Algorithm for shortest paths on random graphs. The
+	 * graphs will be sparse in this case. Every vertex is connected to
+	 * {@code 10} other vertices (asymetrically). Dijkstra's algorithm will
+	 * compute the shortest paths from a random vertex to every other vertex in
+	 * the graph (single-source, multiple-destination).
+	 * <p>This test will analyse the efficiency of the heap mostly on the
+	 * efficiency of its {@code insert} and {@code deleteMin} methods. Since the
+	 * {@code PriorityQueue} has no {@code decreaseKey} method, this algorithm
+	 * simply adds a new element every time a key needs decreasing.</p>
+	 */
+	private void dijkstraSparsePriorityQueue() {
+		final double[] result = new double[maxSize / sizeIncrement];
+		for(int size = sizeIncrement;size < maxSize;size += sizeIncrement) {
+			long time = 0;
+			for(int r = 0;r < repeats;r++) {
+				final PriorityQueue<VertexElem> heap = new PriorityQueue<>();
+				final PriorityQueueVertex[] graph = priorityQueueGraph(size,10);
+				final PriorityQueueVertex start = graph[rng.nextInt(size)]; //Pick a random starting vertex.
+				System.gc();
+				spin();
+				final long before = System.nanoTime();
+				heap.add(new VertexElem(0.0,start)); //Distance to starting vertex is zero.
+				while(!heap.isEmpty()) {
+					final VertexElem current = heap.poll();
+					current.value.visited = true;
+					//Here is where you would report the distance to the vertex (current.getKey()).
+					final double distance = current.key;
+					final PriorityQueueVertex currentVertex = current.value;
+					final PriorityQueueVertex[] neighbours = currentVertex.neighbours;
+					final double[] neighbourDistances = currentVertex.neighbourDistances;
+					for(int i = neighbours.length - 1;i >= 0;i--) {
+						final PriorityQueueVertex neighbour = neighbours[i];
+						final double neighbourDistance = neighbourDistances[i];
+						final VertexElem neighbourElement = neighbour.element;
+						if(!neighbour.visited && (neighbourElement == null || distance + neighbourDistance < neighbourElement.key)) { //Haven't visited this vertex yet.
+							final VertexElem elem = new VertexElem(distance + neighbourDistance,neighbour);
+							neighbour.element = elem;
+							heap.add(elem);
+						}
+					}
+				}
+				final long after = System.nanoTime();
+				time += after - before;
+			}
+			result[size / sizeIncrement] = (double)time / repeats;
+			System.out.println("PriorityQueue(" + size + ") Dijkstra sparse: " + ((double)time / repeats));
+		}
+		results.add(result);
+		resultsHeaders.add("DijkstraSparse PriorityQueue");
 	}
 
 	/**
@@ -1066,6 +1389,58 @@ public class PairingHeapAnalysisTest {
 /////////////////////////////////HELPER METHODS/////////////////////////////////
 
 	/**
+	 * Generates a new random graph, composed of {@code Vertex} instances. Each
+	 * vertex will be randomly connected to {@code degree} other vertices. The
+	 * arcs in the graph will be weighted with a random double between 0 and 1.
+	 * Note that the graph is not symmetrical: If there is an edge from vertex
+	 * {@code v} to vertex {@code w}, that doesn't mean there is an edge from
+	 * {@code w} to {@code v}, and if there is, it doesn't necessarily have the
+	 * same weight.
+	 * @param size The number of vertices in the graph.
+	 * @param degree The number of edges for every vertex.
+	 * @return A new random graph.
+	 */
+	private Vertex[] graph(final int size,final int degree) {
+		if(degree >= size) {
+			throw new IllegalArgumentException("The degree for the graph is too high. It would require every vertex to be connected to " + degree + " other vertices, but there are only " + size + " vertices in total.");
+		}
+		final Vertex[] result = new Vertex[size];
+		for(int i = size - 1;i >= 0;i--) { //Create vertices and allocate memory for them.
+			result[i] = new Vertex(degree);
+		}
+		for(int i = size - 1;i >= 0;i--) { //Connect vertices randomly.
+			result[i].connect(result);
+		}
+		return result;
+	}
+
+	/**
+	 * Generates a new random graph, composed of {@code PriorityQueueVertex}
+	 * instances. Each vertex will be randomly connected to {@code degree} other
+	 * vertices. The arcs in the graph will be weighted with a random double
+	 * between 0 and 1. Note that the graph is not symmetrical: If there is an
+	 * edge from vertex {@code v} to vertex {@code w}, that doesn't mean there
+	 * is an edge from {@code w} to {@code v}, and if there is, it doesn't
+	 * necessarily have the same weight.
+	 * @param size The number of vertices in the graph.
+	 * @param degree The number of edges for every vertex.
+	 * @return A new random graph.
+	 */
+	private PriorityQueueVertex[] priorityQueueGraph(final int size,final int degree) {
+		if(degree >= size) {
+			throw new IllegalArgumentException("The degree for the graph is too high. It would require every vertex to be connected to " + degree + " other vertices, but there are only " + size + " vertices in total.");
+		}
+		final PriorityQueueVertex[] result = new PriorityQueueVertex[size];
+		for(int i = size - 1;i >= 0;i--) { //Create vertices and allocate memory for them.
+			result[i] = new PriorityQueueVertex(degree);
+		}
+		for(int i = size - 1;i >= 0;i--) { //Connect vertices randomly.
+			result[i].connect(result);
+		}
+		return result;
+	}
+
+	/**
 	 * Generates a new random {@code PairingHeap} of the specified size.
 	 * @param size The size of the {@code PairingHeap}.
 	 * @return A new random {@code PairingHeap}.
@@ -1204,6 +1579,20 @@ public class PairingHeapAnalysisTest {
 	 */
 	private class Vertex {
 		/**
+		 * The supposed number of neighbours of this vertex.
+		 */
+		final int capacity;
+
+		/**
+		 * A link to the {@code PairingHeap} element that represents this
+		 * vertex. This allows Dijkstra's Algorithm to find the heap element to
+		 * decrease the key of when it explores the neighbours of a vertex.
+		 * <p>When the vertex is first explored, this field is set to an
+		 * element. Once it has been set, it shouldn't be changed.</p>
+		 */
+		PairingHeap<Double,Vertex>.Element element;
+
+		/**
 		 * The distances to every neighbouring vertex.
 		 */
 		double[] neighbourDistances;
@@ -1214,17 +1603,13 @@ public class PairingHeapAnalysisTest {
 		Vertex[] neighbours;
 
 		/**
-		 * The supposed number of neighbours of this vertex.
-		 */
-		final int capacity;
-
-		/**
 		 * Constructs a new vertex. The adjacency lists of the vertex will have
 		 * the specified capacity.
 		 * @param capacity The capacity of the adjacency lists of the vertex.
 		 */
 		Vertex(final int capacity) {
 			this.capacity = capacity;
+			neighbourDistances = new double[capacity];
 		}
 
 		/**
@@ -1251,10 +1636,133 @@ public class PairingHeapAnalysisTest {
 					selection.add(candidate);
 				}
 			}
-			neighbours = selection.toArray(new Vertex[neighbours.length]);
+			neighbours = selection.toArray(new Vertex[capacity]);
 			for(int i = capacity - 1;i >= 0;i--) {
 				neighbourDistances[i] = rng.nextDouble();
 			}
+		}
+	}
+
+	/**
+	 * A vertex that, when combined with other vertices, forms a simple graph.
+	 * The edges are implemented using an adjacency list.
+	 * <p>This version is meant for the {@code PriorityQueue}, so it stores
+	 * {@code VertexElem}s for quick access, rather than
+	 * {@code PairingHeap.Element}s.</p>
+	 */
+	private class PriorityQueueVertex {
+		/**
+		 * The supposed number of neighbours of this vertex.
+		 */
+		final int capacity;
+
+		/**
+		 * A link to the {@code VertexElem} that represents this vertex. This
+		 * allows Dijkstra's Algorithm to find the heap element to decrease the
+		 * key of when it explores the neighbours of a vertex.
+		 * <p>When the vertex is first explored, this field is set to an
+		 * element. Once it has been set, it shouldn't be changed.</p>
+		 */
+		VertexElem element;
+
+		/**
+		 * The distances to every neighbouring vertex.
+		 */
+		double[] neighbourDistances;
+
+		/**
+		 * All neighbouring vertices of this vertex.
+		 */
+		PriorityQueueVertex[] neighbours;
+
+		/**
+		 * Whether Dijkstra's Algorithm has already visited this vertex. This is
+		 * required since the heap may contain this vertex multiple times
+		 * through different {@code VertexElem}s.
+		 */
+		boolean visited;
+
+		/**
+		 * Constructs a new vertex. The adjacency lists of the vertex will have
+		 * the specified capacity.
+		 * @param capacity The capacity of the adjacency lists of the vertex.
+		 */
+		PriorityQueueVertex(final int capacity) {
+			this.capacity = capacity;
+			neighbourDistances = new double[capacity];
+		}
+
+		/**
+		 * Connects this vertex to other vertices up to the capacity of the
+		 * adjacency list. Random neighbours will be selected from the specified
+		 * candidate vertex array. No duplicates will be selected, nor will the
+		 * vertex be connected to itself.
+		 * <p>Note that the vertices will not be connected symmetrically, nor
+		 * will the graph be Euclidean.</p>
+		 * @param candidates An array of candidate vertices to connect to.
+		 * @throws IllegalArgumentException The candidate list is too short.
+		 * @throws NullPointerException The specified candidate list was
+		 * {@code null}.
+		 */
+		void connect(final PriorityQueueVertex[] candidates) {
+			final int numCandidates = candidates.length;
+			if(numCandidates - 1 < capacity) { //Throws NullPointerException if candidates is null.
+				throw new IllegalArgumentException("There must be enough unique candidates to fill the neighbours list.");
+			}
+			final IdentityHashSet<PriorityQueueVertex> selection = new IdentityHashSet<>(capacity);
+			while(selection.size() < capacity) {
+				final PriorityQueueVertex candidate = candidates[rng.nextInt(numCandidates)];
+				if(candidate != this) {
+					selection.add(candidate);
+				}
+			}
+			neighbours = selection.toArray(new PriorityQueueVertex[capacity]);
+			for(int i = capacity - 1;i >= 0;i--) {
+				neighbourDistances[i] = rng.nextDouble();
+			}
+		}
+	}
+
+	/**
+	 * A simple key-value pair that can be compared by its key, but holds
+	 * vertices. The purpose of this helper class is to provide the
+	 * {@code PriorityQueue} with light-weight elements of which the key may
+	 * change. The alternative is to create new {@code Vertex} elements for
+	 * every decrease of key, but those vertices may (in dense graphs) take a
+	 * linear amount of memory and would have a linear construction time. That's
+	 * why this solution was chosen, albeit a little cumbersome.
+	 */
+	private class VertexElem implements Comparable<VertexElem> {
+		/**
+		 * The key of the element. This indicates the distance of the vertex to
+		 * the source.
+		 */
+		Double key;
+
+		/**
+		 * The value of the element. This is the vertex this element represents.
+		 */
+		final PriorityQueueVertex value;
+
+		/**
+		 * Constructs a new {@code VertexElem} with the specified key and value.
+		 * @param key The key for the new {@code VertexElem}.
+		 * @param value The vertex for the new {@code VertexElem}.
+		 */
+		VertexElem(final Double key,final PriorityQueueVertex value) {
+			this.key = key;
+			this.value = value;
+		}
+
+		/**
+		 * Compares this {@code VertexElem} with another {@code VertexElem}.
+		 * Only the keys are compared and the result is returned.
+		 * @param other The {@code VertexElem} to compare this element with.
+		 * @return The result of comparing the keys of the elements.
+		 */
+		@Override
+		public int compareTo(final VertexElem other) {
+			return Double.compare(key,other.key);
 		}
 	}
 }
