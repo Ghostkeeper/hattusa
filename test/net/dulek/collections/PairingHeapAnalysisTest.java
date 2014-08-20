@@ -24,13 +24,16 @@ package net.dulek.collections;
 
 import java.io.*;
 import java.util.*;
+import net.dulek.collections.HashSet;
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
  *
  * @author Ruben Dulek
  */
+//@Ignore
 public class PairingHeapAnalysisTest {
 	/**
 	 * The size of the largest tests to try.

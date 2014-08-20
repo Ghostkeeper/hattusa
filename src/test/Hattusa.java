@@ -69,19 +69,12 @@ public class Hattusa implements Runnable {
 		for(int i = 30 - 1;i >= 0;i--) {
 			me.insert(rng.nextInt(97) + 2,value);
 		}
-		me.visualise();
-		int foo = 0;
 		for(PairingHeap<Integer,String>.Element element : me.entrySet()) {
 			System.out.println("Decreasing " + element.getKey() + ".");
 			Integer originalKey = element.getKey();
 			me.decreaseKey(element,1);
-			me.visualise();
-			foo++;
 			System.out.println("Restoring " + originalKey + ".");
 			me.changeKey(element,originalKey); //Change it back.
-			me.print();
-			me.visualise();
-			foo = 1;
 		}
 	}
 }

@@ -310,7 +310,7 @@ public class PairingHeap<K,V> implements Iterable<PairingHeap<K,V>.Element>,Seri
 				//Remove the element from its environment and put its children into its place.
 				if(element == root) { //The root is different: To put its children into its place we'd need to make the children the new root.
 					if(element.child != null) {
-						final Element children = combineMultiPassComparable(element.child);
+						final Element children = combineTwoPassComparable(element.child);
 						element.child = null;
 						root = joinComparable(element,children);
 						return oldKey;
@@ -332,7 +332,7 @@ public class PairingHeap<K,V> implements Iterable<PairingHeap<K,V>.Element>,Seri
 						}
 					}
 				} else { //It has children and they'll need to be combined.
-					final Element children = combineMultiPassComparable(element.child);
+					final Element children = combineTwoPassComparable(element.child);
 					children.previous = element.previous;
 					children.next = element.next;
 					if(element.previous.child == element) { //This is the leftmost child.
@@ -356,7 +356,7 @@ public class PairingHeap<K,V> implements Iterable<PairingHeap<K,V>.Element>,Seri
 				//Remove the element from its environment and put its children into its place.
 				if(element == root) { //The root is different: To put its children into its place we'd need to make the children the new root.
 					if(element.child != null) {
-						final Element children = combineMultiPassComparator(element.child);
+						final Element children = combineTwoPassComparator(element.child);
 						element.child = null;
 						root = joinComparator(element,children);
 						return oldKey;
@@ -378,7 +378,7 @@ public class PairingHeap<K,V> implements Iterable<PairingHeap<K,V>.Element>,Seri
 						}
 					}
 				} else { //It has children and they'll need to be combined.
-					final Element children = combineMultiPassComparator(element.child);
+					final Element children = combineTwoPassComparator(element.child);
 					children.previous = element.previous;
 					children.next = element.next;
 					if(element.previous.child == element) { //This is the leftmost child.
@@ -688,9 +688,9 @@ public class PairingHeap<K,V> implements Iterable<PairingHeap<K,V>.Element>,Seri
 		} else { //It has children, and they'll need to be combined.
 			final Element children;
 			if(comparator == null) { //Merge children using Comparable.
-				children = combineMultiPassComparable(element.child);
+				children = combineTwoPassComparable(element.child);
 			} else { //Merge children using Comparator.
-				children = combineMultiPassComparator(element.child);
+				children = combineTwoPassComparator(element.child);
 			}
 			children.previous = element.previous;
 			children.next = element.next;
@@ -734,9 +734,9 @@ public class PairingHeap<K,V> implements Iterable<PairingHeap<K,V>.Element>,Seri
 			size--;
 			return result;
 		} else if(comparator == null) { //We're merging. Use the Comparable version.
-			root = combineMultiPassComparable(root.child);
+			root = combineTwoPassComparable(root.child);
 		} else { //We're merging. Use the Comparator version.
-			root = combineMultiPassComparator(root.child);
+			root = combineTwoPassComparator(root.child);
 		}
 		root.previous = null;
 		root.next = null;
@@ -1339,9 +1339,9 @@ public class PairingHeap<K,V> implements Iterable<PairingHeap<K,V>.Element>,Seri
 			} else { //It has children, and they'll need to be combined.
 				final Element children;
 				if(comparator == null) { //Merge children using Comparable.
-					children = combineMultiPassComparable(current.child);
+					children = combineTwoPassComparable(current.child);
 				} else { //Merge children using Comparator.
-					children = combineMultiPassComparator(current.child);
+					children = combineTwoPassComparator(current.child);
 				}
 				children.previous = current.previous;
 				children.next = current.next;
@@ -1877,299 +1877,6 @@ public class PairingHeap<K,V> implements Iterable<PairingHeap<K,V>.Element>,Seri
 				childDone = true;
 				//But don't write the parent again!
 			}
-		}
-	}
-
-	/**
-	 * Testing routine to print the heap to System.out.
-	 */
-	public void print() {
-		if(root == null) {
-			System.out.println("Empty heap.");
-			return;
-		}
-		System.out.println("Root: " + root.key);
-		System.out.print("Traversal: ");
-		for(Element elem : this) {
-			System.out.print(elem.key + " ");
-		}
-		System.out.println(" (" + size + ")");
-		for(Element elem : this) {
-			if(elem.child != null) {
-				System.out.print(elem.key + ": ");
-				Element current = elem.child;
-				while(current != null) {
-					System.out.print(current.key + ", ");
-					current = current.next;
-				}
-				System.out.println();
-			}
-		}
-		System.out.println();
-	}
-
-	/**
-	 * Another testing routine. This one prints the tree on an image.
-	 */
-	public void visualise() {
-		java.awt.image.BufferedImage image = new java.awt.image.BufferedImage(1000,1000,java.awt.image.BufferedImage.TYPE_BYTE_GRAY);
-		for(int x = 0;x < 1000;x++) {
-			for(int y = 0;y < 1000;y++) {
-				image.setRGB(x,y,0);
-			}
-		}
-		final Map<Element,Integer> elemX = new IdentityHashMap<>(size);
-		final Map<Element,Integer> elemY = new IdentityHashMap<>(size);
-		Element current = root;
-		int x = 1;
-		int y = 1;
-		Deque<Element> todo = new ArrayDeque<>();
-		while(true) {
-			if(!elemX.containsKey(current)) {
-				elemX.put(current,x);
-				elemY.put(current,y);
-			}
-			visualiseElement(image,x,y,current);
-			if(current.previous != null) {
-				if(elemX == null || current == null || current.previous == null) {
-					throw new InternalError();
-				}
-				Element temp = current.previous;
-				if(elemX.get(temp) == null) {
-					int foo = 0;
-				}
-				int prevX = elemX.get(temp);
-				int prevY = elemY.get(temp);
-				if(current.previous.next == current) {
-					visualiseArrow(image,x,y + 6,prevX + 10,prevY + 6);
-				} else if(current.previous.child == current) {
-					visualiseArrow(image,x + 6,y,prevX + 6,prevY + 10);
-				} else {
-					visualiseArrow(image,x,y,prevX + 10,prevY + 10);
-				}
-			}
-			if(current.child != null && !elemX.containsKey(current.child)) {
-				visualiseArrow(image,x + 3,y + 10,x + 3,y + 20);
-				if(current.next != null) {
-					int width = visualiseWidth(current) * 20;
-					visualiseArrow(image,x + 10,y + 3,x + width,y + 3);
-					if(!elemX.containsKey(current.next)) {
-						todo.push(current.next);
-						elemX.put(current.next,x + width);
-						elemY.put(current.next,y);
-					} else {
-						System.out.println("Already seen " + current.next.key);
-					}
-				}
-				current = current.child;
-				y += 20;
-			} else if(current.next != null && !elemX.containsKey(current.next)) {
-				int width = visualiseWidth(current) * 20;
-				visualiseArrow(image,x + 10,y + 3,x + width,y + 3);
-				current = current.next;
-				x += width;
-			} else {
-				if(todo.isEmpty()) {
-					break;
-				}
-				current = todo.pop();
-				x = elemX.get(current);
-				y = elemY.get(current);
-			}
-		}
-		try {
-			javax.imageio.ImageIO.write(image,"PNG",new java.io.File("C:/temp/visualisation.png"));
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private int visualiseWidth(Element element) {
-		int width = 1;
-		if(element.child != null) {
-			width = 0;
-			for(Element current = element.child;current != null;current = current.next) {
-				width += visualiseWidth(current);
-			}
-		}
-		return width;
-	}
-
-	private void visualiseLine(java.awt.image.BufferedImage image,int x1,int y1,int x2,int y2) {
-		if(x1 < 0 || x1 >= 1000 || x2 < 0 || x2 >= 1000 || y1 < 0 || y1 >= 1000 || y2 < 0 || y2 >= 1000) {
-			System.out.println("Out of bounds: (" + x1 + "," + y1 + ") - (" + x2 + "," + y2 + ")");
-		}
-		for(double i = 0;i < 1;i += 0.01) {
-			image.setRGB((int)(x1 + (x2 - x1) * i),(int)(y1 + (y2 - y1) * i),Integer.MAX_VALUE);
-		}
-	}
-
-	private void visualiseArrow(java.awt.image.BufferedImage image,int x1,int y1,int x2,int y2) {
-		visualiseLine(image,x1,y1,x2,y2);
-		image.setRGB(x2,y2,Integer.MAX_VALUE);
-		image.setRGB(x2 + 1,y2 + 1,Integer.MAX_VALUE);
-		image.setRGB(x2 - 1,y2 - 1,Integer.MAX_VALUE);
-		image.setRGB(x2 + 1,y2 - 1,Integer.MAX_VALUE);
-		image.setRGB(x2 - 1,y2 + 1,Integer.MAX_VALUE);
-	}
-
-	private void visualiseElement(java.awt.image.BufferedImage image,int x,int y,Element element) {
-		visualiseLine(image,x,y,x + 10,y);
-		visualiseLine(image,x + 10,y,x + 10,y + 10);
-		visualiseLine(image,x + 10,y + 10,x,y + 10);
-		visualiseLine(image,x,y + 10,x,y);
-		int key = (Integer)element.getKey(); //Yes, this only works for integer keys. I didn't put in the whole alphabet or something.
-		int digitx = x + 5;
-		while(key > 0) {
-			visualiseDigit(image,digitx,y + 3,key % 10);
-			key /= 10;
-			digitx -= 4;
-		}
-	}
-
-	private void visualiseDigit(java.awt.image.BufferedImage image,int x,int y,int digit) {
-		int colour = Integer.MAX_VALUE << 14;
-		//Sorry. I have no internet and couldn't remember how to print text... Haha.
-		switch(digit) {
-			case 0:
-				image.setRGB(x + 1,y,colour);
-				image.setRGB(x + 2,y,colour);
-				image.setRGB(x + 3,y + 1,colour);
-				image.setRGB(x + 3,y + 2,colour);
-				image.setRGB(x + 3,y + 3,colour);
-				image.setRGB(x + 2,y + 4,colour);
-				image.setRGB(x + 1,y + 4,colour);
-				image.setRGB(x,y + 3,colour);
-				image.setRGB(x,y + 2,colour);
-				image.setRGB(x,y + 1,colour);
-				break;
-			case 1:
-				image.setRGB(x,y + 1,colour);
-				image.setRGB(x + 1,y,colour);
-				image.setRGB(x + 1,y + 1,colour);
-				image.setRGB(x + 1,y + 2,colour);
-				image.setRGB(x + 1,y + 3,colour);
-				image.setRGB(x + 1,y + 4,colour);
-				break;
-			case 2:
-				image.setRGB(x,y + 1,colour);
-				image.setRGB(x + 1,y,colour);
-				image.setRGB(x + 2,y,colour);
-				image.setRGB(x + 3,y + 1,colour);
-				image.setRGB(x + 3,y + 2,colour);
-				image.setRGB(x + 2,y + 3,colour);
-				image.setRGB(x + 1,y + 4,colour);
-				image.setRGB(x,y + 4,colour);
-				image.setRGB(x + 2,y + 4,colour);
-				image.setRGB(x + 3,y + 4,colour);
-				break;
-			case 3:
-				image.setRGB(x,y,colour);
-				image.setRGB(x + 1,y,colour);
-				image.setRGB(x + 2,y,colour);
-				image.setRGB(x + 3,y,colour);
-				image.setRGB(x + 3,y + 1,colour);
-				image.setRGB(x + 3,y + 2,colour);
-				image.setRGB(x + 2,y + 2,colour);
-				image.setRGB(x + 3,y + 3,colour);
-				image.setRGB(x + 3,y + 4,colour);
-				image.setRGB(x + 2,y + 4,colour);
-				image.setRGB(x + 1,y + 4,colour);
-				image.setRGB(x,y + 4,colour);
-				break;
-			case 4:
-				image.setRGB(x,y,colour);
-				image.setRGB(x,y + 1,colour);
-				image.setRGB(x,y + 2,colour);
-				image.setRGB(x,y + 3,colour);
-				image.setRGB(x + 1,y + 3,colour);
-				image.setRGB(x + 2,y + 3,colour);
-				image.setRGB(x + 3,y + 3,colour);
-				image.setRGB(x + 3,y + 2,colour);
-				image.setRGB(x + 3,y + 1,colour);
-				image.setRGB(x + 3,y,colour);
-				image.setRGB(x + 3,y + 4,colour);
-				break;
-			case 5:
-				image.setRGB(x + 3,y,colour);
-				image.setRGB(x + 2,y,colour);
-				image.setRGB(x + 1,y,colour);
-				image.setRGB(x,y,colour);
-				image.setRGB(x,y + 1,colour);
-				image.setRGB(x,y + 2,colour);
-				image.setRGB(x + 1,y + 2,colour);
-				image.setRGB(x + 2,y + 2,colour);
-				image.setRGB(x + 3,y + 2,colour);
-				image.setRGB(x + 3,y + 3,colour);
-				image.setRGB(x + 3,y + 4,colour);
-				image.setRGB(x + 2,y + 4,colour);
-				image.setRGB(x + 1,y + 4,colour);
-				image.setRGB(x,y + 4,colour);
-				break;
-			case 6:
-				image.setRGB(x + 3,y,colour);
-				image.setRGB(x + 2,y,colour);
-				image.setRGB(x + 1,y,colour);
-				image.setRGB(x,y,colour);
-				image.setRGB(x,y + 1,colour);
-				image.setRGB(x,y + 2,colour);
-				image.setRGB(x,y + 3,colour);
-				image.setRGB(x,y + 4,colour);
-				image.setRGB(x + 1,y + 4,colour);
-				image.setRGB(x + 2,y + 4,colour);
-				image.setRGB(x + 3,y + 4,colour);
-				image.setRGB(x + 3,y + 3,colour);
-				image.setRGB(x + 3,y + 2,colour);
-				image.setRGB(x + 2,y + 2,colour);
-				image.setRGB(x + 1,y + 2,colour);
-				break;
-			case 7:
-				image.setRGB(x,y,colour);
-				image.setRGB(x + 1,y,colour);
-				image.setRGB(x + 2,y,colour);
-				image.setRGB(x + 3,y,colour);
-				image.setRGB(x + 3,y + 1,colour);
-				image.setRGB(x + 3,y + 2,colour);
-				image.setRGB(x + 3,y + 3,colour);
-				image.setRGB(x + 3,y + 4,colour);
-				break;
-			case 8:
-				image.setRGB(x,y,colour);
-				image.setRGB(x + 1,y,colour);
-				image.setRGB(x + 2,y,colour);
-				image.setRGB(x + 3,y,colour);
-				image.setRGB(x + 3,y + 1,colour);
-				image.setRGB(x + 3,y + 2,colour);
-				image.setRGB(x + 3,y + 3,colour);
-				image.setRGB(x + 3,y + 4,colour);
-				image.setRGB(x + 2,y + 4,colour);
-				image.setRGB(x + 1,y + 4,colour);
-				image.setRGB(x,y + 4,colour);
-				image.setRGB(x,y + 3,colour);
-				image.setRGB(x,y + 2,colour);
-				image.setRGB(x,y + 1,colour);
-				image.setRGB(x + 1,y + 2,colour);
-				image.setRGB(x + 2,y + 2,colour);
-				break;
-			case 9:
-				image.setRGB(x,y,colour);
-				image.setRGB(x + 1,y,colour);
-				image.setRGB(x + 2,y,colour);
-				image.setRGB(x + 3,y,colour);
-				image.setRGB(x + 3,y + 1,colour);
-				image.setRGB(x + 3,y + 2,colour);
-				image.setRGB(x + 3,y + 3,colour);
-				image.setRGB(x + 3,y + 4,colour);
-				image.setRGB(x + 2,y + 4,colour);
-				image.setRGB(x + 1,y + 4,colour);
-				image.setRGB(x,y + 4,colour);
-				image.setRGB(x,y + 2,colour);
-				image.setRGB(x,y + 1,colour);
-				image.setRGB(x + 1,y + 2,colour);
-				image.setRGB(x + 2,y + 2,colour);
-				break;
-			default:
-				throw new InternalError("Unknown digit " + digit);
 		}
 	}
 }

@@ -35,7 +35,7 @@ import org.junit.Test;
  * @author Ruben Dulek
  * @version 1.0
  */
-//@Ignore
+@Ignore
 public class PairingHeapTest {
 	/**
 	 * Number of times to repeat the tests. All results are averaged.
