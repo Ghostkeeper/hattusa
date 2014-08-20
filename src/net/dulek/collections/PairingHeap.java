@@ -310,7 +310,7 @@ public class PairingHeap<K,V> implements Iterable<PairingHeap<K,V>.Element>,Seri
 				//Remove the element from its environment and put its children into its place.
 				if(element == root) { //The root is different: To put its children into its place we'd need to make the children the new root.
 					if(element.child != null) {
-						final Element children = combineTwoPassComparable(element.child);
+						final Element children = combineMultiPassComparable(element.child);
 						element.child = null;
 						root = joinComparable(element,children);
 						return oldKey;
@@ -332,7 +332,7 @@ public class PairingHeap<K,V> implements Iterable<PairingHeap<K,V>.Element>,Seri
 						}
 					}
 				} else { //It has children and they'll need to be combined.
-					final Element children = combineTwoPassComparable(element.child);
+					final Element children = combineMultiPassComparable(element.child);
 					children.previous = element.previous;
 					children.next = element.next;
 					if(element.previous.child == element) { //This is the leftmost child.
@@ -356,7 +356,7 @@ public class PairingHeap<K,V> implements Iterable<PairingHeap<K,V>.Element>,Seri
 				//Remove the element from its environment and put its children into its place.
 				if(element == root) { //The root is different: To put its children into its place we'd need to make the children the new root.
 					if(element.child != null) {
-						final Element children = combineTwoPassComparator(element.child);
+						final Element children = combineMultiPassComparator(element.child);
 						element.child = null;
 						root = joinComparator(element,children);
 						return oldKey;
@@ -378,7 +378,7 @@ public class PairingHeap<K,V> implements Iterable<PairingHeap<K,V>.Element>,Seri
 						}
 					}
 				} else { //It has children and they'll need to be combined.
-					final Element children = combineTwoPassComparator(element.child);
+					final Element children = combineMultiPassComparator(element.child);
 					children.previous = element.previous;
 					children.next = element.next;
 					if(element.previous.child == element) { //This is the leftmost child.
@@ -688,9 +688,9 @@ public class PairingHeap<K,V> implements Iterable<PairingHeap<K,V>.Element>,Seri
 		} else { //It has children, and they'll need to be combined.
 			final Element children;
 			if(comparator == null) { //Merge children using Comparable.
-				children = combineTwoPassComparable(element.child);
+				children = combineMultiPassComparable(element.child);
 			} else { //Merge children using Comparator.
-				children = combineTwoPassComparator(element.child);
+				children = combineMultiPassComparator(element.child);
 			}
 			children.previous = element.previous;
 			children.next = element.next;
@@ -734,9 +734,9 @@ public class PairingHeap<K,V> implements Iterable<PairingHeap<K,V>.Element>,Seri
 			size--;
 			return result;
 		} else if(comparator == null) { //We're merging. Use the Comparable version.
-			root = combineTwoPassComparable(root.child);
+			root = combineMultiPassComparable(root.child);
 		} else { //We're merging. Use the Comparator version.
-			root = combineTwoPassComparator(root.child);
+			root = combineMultiPassComparator(root.child);
 		}
 		root.previous = null;
 		root.next = null;
@@ -1339,9 +1339,9 @@ public class PairingHeap<K,V> implements Iterable<PairingHeap<K,V>.Element>,Seri
 			} else { //It has children, and they'll need to be combined.
 				final Element children;
 				if(comparator == null) { //Merge children using Comparable.
-					children = combineTwoPassComparable(current.child);
+					children = combineMultiPassComparable(current.child);
 				} else { //Merge children using Comparator.
-					children = combineTwoPassComparator(current.child);
+					children = combineMultiPassComparator(current.child);
 				}
 				children.previous = current.previous;
 				children.next = current.next;
@@ -1495,6 +1495,89 @@ public class PairingHeap<K,V> implements Iterable<PairingHeap<K,V>.Element>,Seri
 	 * When their parent has been removed, this helper method merges its
 	 * children together. Out comes the element with the lowest key of these
 	 * children, with the others linked below it.
+	 * <p>This method implements the multi-pass strategy, cited by many
+	 * experiments as a faster alternative of the two-pass strategy. This
+	 * strategy goes through the children from left to right, merging every
+	 * second sibling with the one before it. Next, it starts over at the left,
+	 * merging pairs again. This continues until there is only one node left at
+	 * the root. That node is returned.</p>
+	 * <p>This version assumes that no comparator is available, and keys must be
+	 * compared using their natural ordering.</p>
+	 * @param element The leftmost sibling of the siblings that must be combined
+	 * into one.
+	 * @return The root of the subtree that should be placed in the place of the
+	 * specified element's removed parent.
+	 * @throws NullPointerException The specified element was {@code null}. The
+	 * method doesn't check for this.
+	 */
+	private Element combineMultiPassComparable(Element element) {
+		while(element.next != null) { //Until the leftmost element is a singleton, make a pass.
+			Element current = element.next.next; //Start at the left side.
+			element = joinComparable(element,element.next); //Join the first pair (we know it's a pair) separately, since we need to remember the leftmost element.
+			Element previousPair = element;
+			while(current != null) {
+				final Element even = current; //The two elements we'll join.
+				final Element odd = current.next;
+				if(odd == null) { //There was an odd number of siblings.
+					previousPair.next = even; //Add the last one as singleton.
+					break; //Done with this pass.
+				}
+				current = odd.next; //Move the index before we mess up the next-pointer of odd.
+				Element newPair = joinComparable(even,odd); //Merge these two.
+				previousPair.next = newPair; //Link it so we can find them back.
+				previousPair = newPair;
+			}
+		}
+
+		element.previous = null; //Make sure it's properly unlinked otherwise.
+		return element; //Now return the leftmost (and only) sibling.
+	}
+
+	/**
+	 * When their parent has been removed, this helper method merges its
+	 * children together. Out comes the element with the lowest key of these
+	 * children, with the others linked below it.
+	 * <p>This method implements the multi-pass strategy, cited by many
+	 * experiments as a faster alternative of the two-pass strategy. This
+	 * strategy goes through the children from left to right, merging every
+	 * second sibling with the one before it. Next, it starts over at the left,
+	 * merging pairs again. This continues until there is only one node left at
+	 * the root. That node is returned.</p>
+	 * <p>This version assumes that a comparator is available and keys must be
+	 * compared using that comparator.</p>
+	 * @param element The leftmost sibling of the siblings that must be combined
+	 * into one.
+	 * @return The root of the subtree that should be placed in the place of the
+	 * specified element's removed parent.
+	 * @throws NullPointerException The specified element was {@code null}. The
+	 * method doesn't check for this.
+	 */
+	private Element combineMultiPassComparator(Element element) {
+		while(element.next != null) { //Until the leftmost element is a singleton, make a pass.
+			Element current = element.next.next; //Start at the left side.
+			element = joinComparator(element,element.next); //Join the first pair (we know it's a pair) separately, since we need to remember the leftmost element.
+			Element previousPair = element;
+			while(current != null) {
+				final Element even = current; //The two elements we'll join.
+				final Element odd = current.next;
+				if(odd == null) { //There was an odd number of siblings.
+					previousPair.next = even; //Add the last one as singleton.
+					break; //Done with this pass.
+				}
+				current = odd.next; //Move the index before we mess up the next-pointer of odd.
+				Element newPair = joinComparator(even,odd); //Merge these two.
+				previousPair.next = newPair; //Link it so we can find them back.
+				previousPair = newPair;
+			}
+		}
+
+		return element; //Now return the leftmost (and only) sibling.
+	}
+
+	/**
+	 * When their parent has been removed, this helper method merges its
+	 * children together. Out comes the element with the lowest key of these
+	 * children, with the others linked below it.
 	 * <p>This method implements the two-pass strategy as described in the paper
 	 * by Fredman et al. First, it goes through the children from left to right,
 	 * merging every second sibling with the one before it. Then, it linearly
@@ -1507,19 +1590,15 @@ public class PairingHeap<K,V> implements Iterable<PairingHeap<K,V>.Element>,Seri
 	 * into one.
 	 * @return The root of the subtree that should be placed in the place of the
 	 * specified element's removed parent.
-	 * @throws ArrayIndexOutOfBoundsException The specified element is
-	 * {@code null}. The method doesn't check for this.
 	 */
 	private Element combineTwoPassComparable(final Element element) {
 		//First pass: Combine adjacent pairs.
-		//final List<Element> pairs = new ArrayList<>(net.dulek.math.Math.log2(size)); //List of pairs after the first pass.
 		Element previousPair = null; //In order to go in backwards order, we'll link each pair to the previous pair in advance.
 		Element current = element;
 		while(current != null) {
 			final Element even = current; //The two elements we'll join.
 			final Element odd = current.next;
 			if(odd == null) { //There was an odd number of siblings.
-				//pairs.add(even); //Add the last one singularly.
 				even.previous = previousPair; //Add the last one as singleton.
 				previousPair = even;
 				break;
@@ -1528,16 +1607,10 @@ public class PairingHeap<K,V> implements Iterable<PairingHeap<K,V>.Element>,Seri
 			Element newPair = joinComparable(even,odd); //Merge these two.
 			newPair.previous = previousPair; //Link it so we can find them back.
 			previousPair = newPair;
-			//pairs.add(joinComparable(even,odd)); //Merge these two.
 		}
 
 		//Second pass: Combine linearly from back to front.
 		Element result = null;
-		/*
-		for(int i = pairs.size() - 1;i >= 0;i--) { //Iterate linearly from back to front.
-			result = joinComparable(pairs.get(i),result); //And combine one by one.
-		}
-		*/
 		while(previousPair != null) { //Traverse lineraly from back to front.
 			current = previousPair;
 			previousPair = previousPair.previous;
@@ -1563,28 +1636,31 @@ public class PairingHeap<K,V> implements Iterable<PairingHeap<K,V>.Element>,Seri
 	 * into one.
 	 * @return The root of the subtree that should be placed in the place of the
 	 * specified element's removed parent.
-	 * @throws ArrayIndexOutOfBoundsException The specified element is
-	 * {@code null}. The method doesn't check for this.
 	 */
 	private Element combineTwoPassComparator(final Element element) {
 		//First pass: Combine adjacent pairs.
-		final List<Element> pairs = new ArrayList<>(net.dulek.math.Math.log2(size)); //List of pairs after the first pass.
+		//final List<Element> pairs = new ArrayList<>(net.dulek.math.Math.log2(size)); //List of pairs after the first pass.
+		Element previousPair = null; //In order to go in backwards order, we'll link each pair to the previous pair in advance.
 		Element current = element;
 		while(current != null) {
 			final Element even = current; //The two elements we'll join.
 			final Element odd = current.next;
 			if(odd == null) { //There was an odd number of siblings.
-				pairs.add(even); //Add the last one singularly.
+				even.previous = previousPair; //Add the last one as singleton.
+				previousPair = even;
 				break;
 			}
 			current = odd.next; //Move the index before we mess up the next-pointer of odd.
-			pairs.add(joinComparator(even,odd)); //Merge these two.
+			Element newPair = joinComparator(even,odd); //Merge these two.
+			newPair.previous = previousPair; //Link it so we can find them back.
 		}
 
 		//Second pass: Combine linearly from back to front.
 		Element result = null;
-		for(int i = pairs.size() - 1;i > 0;i--) { //Iterate linearly from back to front.
-			result = joinComparator(pairs.get(i),result); //And combine one by one.
+		while(previousPair != null) { //Traverse linearly from back to front.
+			current = previousPair;
+			previousPair = previousPair.previous;
+			result = joinComparable(current,result); //Combine one by one.
 		}
 
 		return result;
@@ -1842,8 +1918,8 @@ public class PairingHeap<K,V> implements Iterable<PairingHeap<K,V>.Element>,Seri
 				image.setRGB(x,y,0);
 			}
 		}
-		Map<Element,Integer> elemX = new IdentityHashMap<>(size);
-		Map<Element,Integer> elemY = new IdentityHashMap<>(size);
+		final Map<Element,Integer> elemX = new IdentityHashMap<>(size);
+		final Map<Element,Integer> elemY = new IdentityHashMap<>(size);
 		Element current = root;
 		int x = 1;
 		int y = 1;
@@ -1855,8 +1931,15 @@ public class PairingHeap<K,V> implements Iterable<PairingHeap<K,V>.Element>,Seri
 			}
 			visualiseElement(image,x,y,current);
 			if(current.previous != null) {
-				int prevX = elemX.get(current.previous);
-				int prevY = elemY.get(current.previous);
+				if(elemX == null || current == null || current.previous == null) {
+					throw new InternalError();
+				}
+				Element temp = current.previous;
+				if(elemX.get(temp) == null) {
+					int foo = 0;
+				}
+				int prevX = elemX.get(temp);
+				int prevY = elemY.get(temp);
 				if(current.previous.next == current) {
 					visualiseArrow(image,x,y + 6,prevX + 10,prevY + 6);
 				} else if(current.previous.child == current) {

@@ -35,7 +35,7 @@ import org.junit.Test;
  * @author Ruben Dulek
  * @version 1.0
  */
-@Ignore
+//@Ignore
 public class PairingHeapTest {
 	/**
 	 * Number of times to repeat the tests. All results are averaged.
@@ -179,6 +179,9 @@ public class PairingHeapTest {
 
 		long meTime = 0;
 		for(int t = numTests - 1;t >= 0;t--) {
+			if(t % (numTests / 100) == 0) {
+				System.out.println("DecreaseKey PairingHeap: " + ((numTests - t) / (numTests / 100)) + "%");
+			}
 			PairingHeap<Double,String> inst = new PairingHeap<>();
 			for(int i = testSize - 1;i >= 0;i--) {
 				inst.insert(randomTest.get(i),value);
@@ -195,6 +198,9 @@ public class PairingHeapTest {
 		printMe(meTime);
 		long themTime = 0;
 		for(int t = numTests - 1;t >= 0;t--) {
+			if(t % (numTests / 100) == 0) {
+				System.out.println("DecreaseKey PriorityQueue: " + ((numTests - t) / (numTests / 100)) + "%");
+			}
 			PriorityQueue<Elem> inst = new PriorityQueue<>(randomTestElems);
 			System.gc();
 			spin();
@@ -215,7 +221,7 @@ public class PairingHeapTest {
 	 * Test of the deleteMin method on its own. The speed is compared against
 	 * the {@code PriorityQueue}'s poll method.
 	 */
-	@Ignore
+	//@Ignore
 	@Test
 	public void deleteMin() {
 		System.out.print("DeleteMin:                    ");

@@ -64,7 +64,7 @@ public class Hattusa implements Runnable {
 		}
 
 		//Correctness.
-		/*Random rng = new Random(0x12345678);
+		Random rng = new Random(0x12345678);
 		PairingHeap<Integer,String> me = new PairingHeap<>();
 		for(int i = 30 - 1;i >= 0;i--) {
 			me.insert(rng.nextInt(97) + 2,value);
@@ -79,8 +79,9 @@ public class Hattusa implements Runnable {
 			foo++;
 			System.out.println("Restoring " + originalKey + ".");
 			me.changeKey(element,originalKey); //Change it back.
+			me.print();
 			me.visualise();
 			foo = 1;
-		}*/
+		}
 	}
 }
