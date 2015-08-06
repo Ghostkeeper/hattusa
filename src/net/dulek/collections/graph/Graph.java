@@ -498,6 +498,27 @@ public interface Graph<V,A> extends Cloneable,Serializable {
 	Set<? extends V> sourceEndpoints(A arc);
 
 	/**
+	 * Returns the strongly connected components of this graph. The strongly
+	 * connected components are the maximal subsets of vertices of the graph
+	 * such that in the subgraph induced by them, every pair of vertices
+	 * {@code u} and {@code v} is connected by a path from {@code u} to
+	 * {@code v} and from {@code v} to {@code u}.
+	 * <p>Note that this may be different from the weakly connected components,
+	 * which are the maximal subsets of vertices of the graph such that every
+	 * pair of vertices {@code u} and {@code v} would be connected by a path
+	 * from {@code u} to {@code v} and from {@code v} to {@code u} only if all
+	 * arcs would be replaced by undirected edges. In an undirected graph, the
+	 * two are equivalent.</p>
+	 * <p>The result is returned in the form of a set of strongly connected
+	 * components, where every strongly connected component is represented by a
+	 * set of vertices. If the graph has no vertices, the result is an empty
+	 * set. All vertices must be contained in exactly one strongly connected
+	 * component.</p>
+	 * @return The strongly connected components of this graph.
+	 */
+	Set<Set<? extends V>> stronglyConnectedComponents();
+
+	/**
 	 * Returns a {@code String} representation of the graph. The string should
 	 * represent the graph in one of two ways.
 	 * <p>For planar graphs, the string may provide an ASCII-drawing of the
@@ -524,4 +545,26 @@ public interface Graph<V,A> extends Cloneable,Serializable {
 	 * @return A set of all vertices in the graph.
 	 */
 	Set<? extends V> vertices();
+
+	/**
+	 * Returns the weakly connected components of this graph. The weakly
+	 * connected components are the maximal subsets of vertices of the graph
+	 * such that in the subgraph induced by them, every pair of vertices
+	 * {@code u} and {@code v} would be connected by a path from {@code u} to
+	 * {@code v} and from {@code v} to {@code u} if all arcs would be replaced
+	 * by undirected edges.
+	 * <p>Note that this may be different from the strongly connected
+	 * components, which are the maximal subsets of vertices of the graph such
+	 * that every pair of vertices {@code u} and {@code v} in the subgraph
+	 * induced by the subset is already connected by a path from {@code u} to
+	 * {@code v} and from {@code v} to {@code u}. In an undirected graph, the
+	 * two are equivalent.</p>
+	 * <p>The result is returned in the form of a set of weakly connected
+	 * components, where every weakly connected component is represented by a
+	 * set of vertices. If the graph has no vertices, the result is an empty
+	 * set. All vertices must be contained in exactly one weakly connected
+	 * component.</p>
+	 * @return The weakly connected components of this graph.
+	 */
+	Set<Set<? extends V>> weaklyConnectedComponents();
 }
