@@ -1838,6 +1838,30 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 	}
 
 	/**
+	 * Creates a deep copy of the graph, but instead of returning the graph
+	 * itself, it returns the arc corresponding to one of the arcs of the
+	 * original graph. Please note that the entire graph will be copied.
+	 * @param viewpoint The arc in the original graph whose copy must be
+	 * returned.
+	 * @return The copy of the specified arc.
+	 */
+	protected Arc<V,A> clone(final Arc<V,A> viewpoint) {
+		throw new UnsupportedOperationException("Not implemented yet.");
+	}
+
+	/**
+	 * Creates a deep copy of the graph, but instead of returning the graph
+	 * itself, it returns the vertex corresponding to one of the vertices of the
+	 * original graph. Please note that the entire graph will be copied.
+	 * @param viewpoint The vertex in the original graph whose copy must be
+	 * returned.
+	 * @return The copy of the specified vertex.
+	 */
+	protected Vertex<V,A> clone(final Vertex<V,A> viewpoint) {
+		throw new UnsupportedOperationException("Not implemented yet.");
+	}
+
+	/**
 	 * Removes the specified arc from the set of arcs of this graph. The arc is
 	 * only removed from the arc set of the graph. If the operation would cause
 	 * the graph to become invalid, an {@code IllegalStateException} is thrown.
@@ -1861,30 +1885,6 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 	 */
 	protected void removeInternal(final Vertex<V,A> vertex) {
 		vertices.removeInternal(vertex);
-	}
-
-	/**
-	 * Creates a deep copy of the graph, but instead of returning the graph
-	 * itself, it returns the arc corresponding to one of the arcs of the
-	 * original graph. Please note that the entire graph will be copied.
-	 * @param viewpoint The arc in the original graph whose copy must be
-	 * returned.
-	 * @return The copy of the specified arc.
-	 */
-	protected Arc<V,A> clone(final Arc<V,A> viewpoint) {
-		throw new UnsupportedOperationException("Not implemented yet.");
-	}
-
-	/**
-	 * Creates a deep copy of the graph, but instead of returning the graph
-	 * itself, it returns the vertex corresponding to one of the vertices of the
-	 * original graph. Please note that the entire graph will be copied.
-	 * @param viewpoint The vertex in the original graph whose copy must be
-	 * returned.
-	 * @return The copy of the specified vertex.
-	 */
-	protected Vertex<V,A> clone(final Vertex<V,A> viewpoint) {
-		throw new UnsupportedOperationException("Not implemented yet.");
 	}
 
 	/**
