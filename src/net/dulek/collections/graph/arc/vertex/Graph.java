@@ -1653,6 +1653,11 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 		return arc.sourceEndpoints();
 	}
 
+	@Override
+	public Set<Set<? extends Vertex<V,A>>> stronglyConnectedComponents() {
+		throw new UnsupportedOperationException("Not implemented yet.");
+	}
+
 	/**
 	 * Returns a {@code String} representation of the graph. The string is a
 	 * a concatenation of the string representations of the graph's vertices,
@@ -1734,6 +1739,11 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 			}
 		}
 		return result;
+	}
+
+	@Override
+	public Set<Set<? extends Vertex<V,A>>> weaklyConnectedComponents() {
+		throw new UnsupportedOperationException("Not implemented yet.");
 	}
 
 	/**
