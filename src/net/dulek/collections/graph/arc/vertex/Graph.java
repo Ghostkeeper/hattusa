@@ -345,7 +345,7 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 	 * {@code false} otherwise.
 	 */
 	@Override
-	@SuppressWarnings({"unchecked","element-type-mismatch"})
+	@SuppressWarnings({"unchecked","element-type-mismatch"}) //Unchecked casts and element type mismatches in several places due to the callstack containing both arcs and vertices.
 	public boolean equals(Object obj) {
 		if(obj == null) { //The object may not be null.
 			return false;
