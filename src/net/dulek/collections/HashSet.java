@@ -1082,7 +1082,7 @@ public class HashSet<E> implements Set<E>,Cloneable,Serializable {
 		 */
 		protected Itr() {
 			final Object[] t = table; //Cache a local copy for faster access without JIT compiler.
-			for(index = t.length - 1;index >= 0 && t[index] == null || t[index] == tombstone;index--); //Set index in advance to the index of the first element.
+			for(index = t.length - 1;index >= 0 && (t[index] == null || t[index] == tombstone);index--); //Set index in advance to the index of the first element.
 			expectedModCount = modCount; //Store the modCount of the HashSet. From here, concurrent modification will throw an exception.
 		}
 
