@@ -38,7 +38,7 @@ public class PairingHeapAnalysisTest {
 	/**
 	 * The size of the largest tests to try.
 	 */
-	private final int maxSize = 1_000_000;
+	private final int maxSize = 100_000;
 
 	/**
 	 * The file the test results should be written to.
@@ -92,51 +92,52 @@ public class PairingHeapAnalysisTest {
 	/**
 	 * Performs the test.
 	 */
+	@Ignore
 	@Test
 	public void run() {
 		prepare();
 		try {
 			//All the tests to conduct.
-			/*changeKeyPairingHeap();
+			changeKeyPairingHeap();
 			changeKeyPriorityQueue();
-			clearPairingHeap();
-			clearPriorityQueue();
-			clonePairingHeap();
-			clonePriorityQueue();
-			containsKeyPairingHeap();
-			containsValuePairingHeap();
-			containsPriorityQueue();
-			decreaseKeyPairingHeap();
-			decreaseKeyPriorityQueue();
-			deletePairingHeap();
-			deletePriorityQueue();
-			deleteMinPairingHeap();
-			deleteMinPriorityQueue();
-			entrySetPairingHeap();
-			keySetPairingHeap();
-			valuesPairingHeap();
-			entrySetPriorityQueue();
-			findMinPairingHeap();
-			findMinPriorityQueue();*/
-			insertPairingHeap();
-			insertPriorityQueue();
-			/*isEmptyPairingHeap();
-			isEmptyPriorityQueue();
-			iteratorPairingHeap();
-			iteratorSortedPairingHeap();
-			iteratorPriorityQueue();
-			mergePairingHeap();
-			mergePriorityQueue();
-			sizePairingHeap();
-			sizePriorityQueue();
-			toArrayPairingHeap();
-			toArrayPriorityQueue();*/
-			dijkstraSparsePairingHeap();
-			dijkstraSparsePriorityQueue();
-			dijkstraMediumPairingHeap();
-			dijkstraMediumPriorityQueue();
-			dijkstraDensePairingHeap();
-			dijkstraDensePriorityQueue();
+			//clearPairingHeap();
+			//clearPriorityQueue();
+			//clonePairingHeap();
+			//clonePriorityQueue();
+			//containsKeyPairingHeap();
+			//containsValuePairingHeap();
+			//containsPriorityQueue();
+			//decreaseKeyPairingHeap();
+			//decreaseKeyPriorityQueue();
+			//deletePairingHeap();
+			//deletePriorityQueue();
+			//deleteMinPairingHeap();
+			//deleteMinPriorityQueue();
+			//entrySetPairingHeap();
+			//keySetPairingHeap();
+			//valuesPairingHeap();
+			//entrySetPriorityQueue();
+			//findMinPairingHeap();
+			//findMinPriorityQueue();
+			//insertPairingHeap();
+			//insertPriorityQueue();
+			//isEmptyPairingHeap();
+			//isEmptyPriorityQueue();
+			//iteratorPairingHeap();
+			//iteratorSortedPairingHeap();
+			//iteratorPriorityQueue();
+			//mergePairingHeap();
+			//mergePriorityQueue();
+			//sizePairingHeap();
+			//sizePriorityQueue();
+			//toArrayPairingHeap();
+			//toArrayPriorityQueue();
+			//dijkstraSparsePairingHeap();
+			//dijkstraSparsePriorityQueue();
+			//dijkstraMediumPairingHeap();
+			//dijkstraMediumPriorityQueue();
+			//dijkstraDensePairingHeap();
+			//dijkstraDensePriorityQueue();
 		} catch(final Exception e) { //Catches all exceptions (such as out of memory) and writes intermediate results to the file.
 			e.printStackTrace();
 			writeToFile();
@@ -150,7 +151,9 @@ public class PairingHeapAnalysisTest {
 	 * Tests the {@link PairingHeap#changeKey(PairingHeap.Element,K)} method.
 	 * The keys are <i>always increased</i>.
 	 */
-	private void changeKeyPairingHeap() {
+	@Ignore
+	@Test
+	public void changeKeyPairingHeap() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -170,6 +173,7 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("ChangeKey PairingHeap");
+		writeDirect("C:/temp/changeKeyPairingHeap.csv","PairingHeap.changeKey",result);
 	}
 
 	/**
@@ -180,7 +184,9 @@ public class PairingHeapAnalysisTest {
 	 * to pull them out of the queue, change the key, and then put them back in.
 	 * </p>
 	 */
-	private void changeKeyPriorityQueue() {
+	@Ignore
+	@Test
+	public void changeKeyPriorityQueue() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -203,6 +209,7 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("ChangeKey PriorityQueue");
+		writeDirect("C:/temp/changeKeyPriorityQueue.csv","PriorityQueue.changeKey",result);
 	}
 
 	/**
@@ -212,7 +219,9 @@ public class PairingHeapAnalysisTest {
 	 * measurements so greatly that the signal is indistinguishable from the
 	 * noise.</p>
 	 */
-	private void clearPairingHeap() {
+	@Ignore
+	@Test
+	public void clearPairingHeap() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -231,6 +240,7 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("Clear PairingHeap");
+		writeDirect("C:/temp/clearPairingHeap.csv","PairingHeap.clear",result);
 	}
 
 	/**
@@ -240,7 +250,9 @@ public class PairingHeapAnalysisTest {
 	 * measurements so greatly that the signal is indistinguishable from the
 	 * noise.</p>
 	 */
-	private void clearPriorityQueue() {
+	@Ignore
+	@Test
+	public void clearPriorityQueue() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -259,12 +271,15 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("Clear PriorityQueue");
+		writeDirect("C:/temp/clearPriorityQueue.csv","PriorityQueue.clear",result);
 	}
 
 	/**
 	 * Tests the {@link PairingHeap#clone()} method.
 	 */
-	private void clonePairingHeap() {
+	@Ignore
+	@Test
+	public void clonePairingHeap() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -286,12 +301,15 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("Clone PairingHeap");
+		writeDirect("C:/temp/clonePairingHeap.csv","PairingHeap.clone",result);
 	}
 
 	/**
 	 * Tests the {@link PriorityQueue#PriorityQueue(PriorityQueue)} method.
 	 */
-	private void clonePriorityQueue() {
+	@Ignore
+	@Test
+	public void clonePriorityQueue() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -310,6 +328,7 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("Clone PriorityQueue");
+		writeDirect("C:/temp/clonePriorityQueue.csv","PriorityQueue.clone",result);
 	}
 
 	/**
@@ -320,7 +339,9 @@ public class PairingHeapAnalysisTest {
 	 * this method should not be considered to test the early-termination
 	 * behaviour of the method.</p>
 	 */
-	private void containsKeyPairingHeap() {
+	@Ignore
+	@Test
+	public void containsKeyPairingHeap() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -339,6 +360,7 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("ContainsKey PairingHeap");
+		writeDirect("C:/temp/containsKeyPairingHeap.csv","PairingHeap.containsKey",result);
 	}
 
 	/**
@@ -349,7 +371,9 @@ public class PairingHeapAnalysisTest {
 	 * this method should not be considered to test the early-termination
 	 * behaviour of the method.</p>
 	 */
-	private void containsPriorityQueue() {
+	@Ignore
+	@Test
+	public void containsPriorityQueue() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -367,7 +391,8 @@ public class PairingHeapAnalysisTest {
 			System.out.println("PriorityQueue(" + size + ") contains: " + ((double)time / repeats));
 		}
 		results.add(result);
-		resultsHeaders.add("Clone Contains");
+		resultsHeaders.add("Contains PriorityQueue");
+		writeDirect("C:/temp/containsPriorityQueue.csv","PriorityQueue.contains",result);
 	}
 
 	/**
@@ -375,7 +400,9 @@ public class PairingHeapAnalysisTest {
 	 * <p>The method is tested on value that is not in the heap. No early
 	 * termination will occur.</p>
 	 */
-	private void containsValuePairingHeap() {
+	@Ignore
+	@Test
+	public void containsValuePairingHeap() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -394,6 +421,7 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("ContainsValue PairingHeap");
+		writeDirect("C:/temp/containsValuePairingHeap.csv","PairingHeap.containsValue",result);
 	}
 
 	/**
@@ -404,7 +432,9 @@ public class PairingHeapAnalysisTest {
 	 * For a better comparison, please see the tests on Dijkstra's Algorithm and
 	 * such.</p>
 	 */
-	private void decreaseKeyPairingHeap() {
+	@Ignore
+	@Test
+	public void decreaseKeyPairingHeap() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -424,6 +454,7 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("DecreaseKey PairingHeap");
+		writeDirect("C:/temp/decreaseKeyPairingHeap.csv","PairingHeap.decreaseKey",result);
 	}
 
 	/**
@@ -433,7 +464,9 @@ public class PairingHeapAnalysisTest {
 	 * to pull them out of the queue, decrease the key, and then put them back
 	 * in.</p>
 	 */
-	private void decreaseKeyPriorityQueue() {
+	@Ignore
+	@Test
+	public void decreaseKeyPriorityQueue() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -456,6 +489,7 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("DecreaseKey PriorityQueue");
+		writeDirect("C:/temp/decreaseKeyPriorityQueue.csv","PriorityQueue.decreaseKey",result);
 	}
 
 	/**
@@ -464,7 +498,9 @@ public class PairingHeapAnalysisTest {
 	 * times on each heap ({@code sizeIncrement} times). This should average out
 	 * the amortisation sufficiently.
 	 */
-	private void deletePairingHeap() {
+	@Ignore
+	@Test
+	public void deletePairingHeap() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = sizeIncrement;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -491,6 +527,7 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("Delete PairingHeap");
+		writeDirect("C:/temp/deletePairingHeap.csv","PairingHeap.delete",result);
 	}
 
 	/**
@@ -499,7 +536,9 @@ public class PairingHeapAnalysisTest {
 	 * method is executed multiple times on each heap ({@code sizeIncrement}
 	 * times). This should average out the amortisation sufficiently.
 	 */
-	private void deletePriorityQueue() {
+	@Ignore
+	@Test
+	public void deletePriorityQueue() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = sizeIncrement;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -524,6 +563,7 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("Delete PriorityQueue");
+		writeDirect("C:/temp/deletePriorityQueue.csv","PriorityQueue.delete",result);
 	}
 
 	/**
@@ -532,7 +572,8 @@ public class PairingHeapAnalysisTest {
 	 * multiple times on each heap ({@code sizeIncrement} times). This should
 	 * average out the amortisation sufficiently.
 	 */
-	private void deleteMinPairingHeap() {
+	@Test
+	public void deleteMinPairingHeap() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = sizeIncrement;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -553,6 +594,7 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("DeleteMin PairingHeap");
+		writeDirect("C:/temp/deleteMinPairingHeap.csv","PairingHeap.deleteMin",result);
 	}
 
 	/**
@@ -561,7 +603,9 @@ public class PairingHeapAnalysisTest {
 	 * executed multiple times on each heap ({@code sizeIncrement} times). This
 	 * should average out the amortisation sufficiently.
 	 */
-	private void deleteMinPriorityQueue() {
+	@Ignore
+	@Test
+	public void deleteMinPriorityQueue() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = sizeIncrement;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -582,6 +626,7 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("DeleteMin PriorityQueue");
+		writeDirect("C:/temp/deleteMinPriorityQueue.csv","PriorityQueue.deleteMin",result);
 	}
 
 	/**
@@ -595,7 +640,8 @@ public class PairingHeapAnalysisTest {
 	 * efficiency of its {@code insert} and {@code deleteMin} methods, but also
 	 * a bit on the {@code decreaseKey} method.</p>
 	 */
-	private void dijkstraDensePairingHeap() {
+	@Test
+	public void dijkstraDensePairingHeap() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = sizeIncrement;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -635,6 +681,7 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("DijkstraDense PairingHeap");
+		writeDirect("C:/temp/dijkstraDensePairingHeap.csv","PairingHeap.dijkstraDense",result);
 	}
 
 	/**
@@ -649,7 +696,8 @@ public class PairingHeapAnalysisTest {
 	 * {@code PriorityQueue} has no {@code decreaseKey} method, this algorithm
 	 * simply adds a new element every time a key needs decreasing.</p>
 	 */
-	private void dijkstraDensePriorityQueue() {
+	@Test
+	public void dijkstraDensePriorityQueue() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = sizeIncrement;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -688,6 +736,7 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("DijkstraDense PriorityQueue");
+		writeDirect("C:/temp/dijkstraDensePriorityQueue.csv","PriorityQueue.dijkstraDense",result);
 	}
 
 	/**
@@ -701,7 +750,8 @@ public class PairingHeapAnalysisTest {
 	 * efficiency of its {@code insert} and {@code deleteMin} methods, but also
 	 * a bit on the {@code decreaseKey} method.</p>
 	 */
-	private void dijkstraMediumPairingHeap() {
+	@Test
+	public void dijkstraMediumPairingHeap() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = sizeIncrement;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -741,6 +791,7 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("DijkstraMedium PairingHeap");
+		writeDirect("C:/temp/dijkstraMediumPairingHeap.csv","PairingHeap.dijkstraMedium",result);
 	}
 
 	/**
@@ -755,7 +806,8 @@ public class PairingHeapAnalysisTest {
 	 * {@code PriorityQueue} has no {@code decreaseKey} method, this algorithm
 	 * simply adds a new element every time a key needs decreasing.</p>
 	 */
-	private void dijkstraMediumPriorityQueue() {
+	@Test
+	public void dijkstraMediumPriorityQueue() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = sizeIncrement;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -794,6 +846,7 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("DijkstraMedium PriorityQueue");
+		writeDirect("C:/temp/dijkstraMediumPriorityQueue.csv","PriorityQueue.dijkstraMedium",result);
 	}
 
 	/**
@@ -806,7 +859,9 @@ public class PairingHeapAnalysisTest {
 	 * <p>This test will analyse the efficiency of the heap mostly on the
 	 * efficiency of its {@code insert} and {@code deleteMin} methods.</p>
 	 */
-	private void dijkstraSparsePairingHeap() {
+	@Ignore
+	@Test
+	public void dijkstraSparsePairingHeap() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = sizeIncrement;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -846,6 +901,7 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("DijkstraSparse PairingHeap");
+		writeDirect("C:/temp/dijkstraSparsePairingHeap.csv","PairingHeap.dijkstraSparse",result);
 	}
 
 	/**
@@ -860,7 +916,9 @@ public class PairingHeapAnalysisTest {
 	 * {@code PriorityQueue} has no {@code decreaseKey} method, this algorithm
 	 * simply adds a new element every time a key needs decreasing.</p>
 	 */
-	private void dijkstraSparsePriorityQueue() {
+	@Ignore
+	@Test
+	public void dijkstraSparsePriorityQueue() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = sizeIncrement;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -899,12 +957,15 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("DijkstraSparse PriorityQueue");
+		writeDirect("C:/temp/dijkstraSparsePriorityQueue.csv","PriorityQueue.dijkstraSparse",result);
 	}
 
 	/**
 	 * Tests the {@link PairingHeap#entrySet()} method.
 	 */
-	private void entrySetPairingHeap() {
+	@Ignore
+	@Test
+	public void entrySetPairingHeap() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -922,6 +983,7 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("EntrySet PairingHeap");
+		writeDirect("C:/temp/entrySetPairingHeap.csv","PairingHeap.entrySet",result);
 	}
 
 	/**
@@ -930,7 +992,9 @@ public class PairingHeapAnalysisTest {
 	 * version, a set is generated by iterating over the heap and adding the
 	 * elements one by one. This comparison is likely not fair.
 	 */
-	private void entrySetPriorityQueue() {
+	@Ignore
+	@Test
+	public void entrySetPriorityQueue() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -953,12 +1017,15 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("EntrySet PriorityQueue");
+		writeDirect("C:/temp/entrySetPriorityQueue.csv","PriorityQueue.entrySet",result);
 	}
 
 	/**
 	 * Tests the {@link PairingHeap#findMin()} method.
 	 */
-	private void findMinPairingHeap() {
+	@Ignore
+	@Test
+	public void findMinPairingHeap() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -976,12 +1043,15 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("FindMin PairingHeap");
+		writeDirect("C:/temp/findMinPairingHeap.csv","PairingHeap.findMin",result);
 	}
 
 	/**
 	 * Tests the {@link PriorityQueue#peek()} method.
 	 */
-	private void findMinPriorityQueue() {
+	@Ignore
+	@Test
+	public void findMinPriorityQueue() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -999,6 +1069,7 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("FindMin PriorityQueue");
+		writeDirect("C:/temp/findMinPriorityQueue.csv","PriorityQueue.findMin",result);
 	}
 
 	/**
@@ -1008,7 +1079,9 @@ public class PairingHeapAnalysisTest {
 	 * increment, and then averaged. This should clearly show the break points
 	 * where the {@code PriorityQueue} expands its array.
 	 */
-	private void insertPairingHeap() {
+	@Ignore
+	@Test
+	public void insertPairingHeap() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -1033,6 +1106,7 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("Insert PairingHeap");
+		writeDirect("C:/temp/insertPairingHeap.csv","PairingHeap.insert",result);
 	}
 
 	/**
@@ -1041,7 +1115,9 @@ public class PairingHeapAnalysisTest {
 	 * those between the increment, and then averaged. This should clearly show
 	 * the break points where the {@code PriorityQueue} expands its array.
 	 */
-	private void insertPriorityQueue() {
+	@Ignore
+	@Test
+	public void insertPriorityQueue() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -1066,6 +1142,7 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("Insert PriorityQueue");
+		writeDirect("C:/temp/insertPriorityQueue.csv","PriorityQueue.insert",result);
 	}
 
 	/**
@@ -1073,7 +1150,9 @@ public class PairingHeapAnalysisTest {
 	 * <p>The heap will not be empty, except for the first iteration when
 	 * {@code size == 0}.</p>
 	 */
-	private void isEmptyPairingHeap() {
+	@Ignore
+	@Test
+	public void isEmptyPairingHeap() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -1091,6 +1170,7 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("IsEmpty PairingHeap");
+		writeDirect("C:/temp/isEmptyPairingHeap.csv","PairingHeap.isEmpty",result);
 	}
 
 	/**
@@ -1098,7 +1178,9 @@ public class PairingHeapAnalysisTest {
 	 * <p>The heap will not be empty, except for the first iteration when
 	 * {@code size == 0}.</p>
 	 */
-	private void isEmptyPriorityQueue() {
+	@Ignore
+	@Test
+	public void isEmptyPriorityQueue() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -1116,13 +1198,16 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("IsEmpty PriorityQueue");
+		writeDirect("C:/temp/isEmptyPriorityQueue.csv","PriorityQueue.isEmpty",result);
 	}
 
 	/**
 	 * Tests the {@code PairingHeap}'s iterator. The time of a complete
 	 * iteration of the heap is measured.
 	 */
-	private void iteratorPairingHeap() {
+	@Ignore
+	@Test
+	public void iteratorPairingHeap() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -1140,13 +1225,16 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("Iterator PairingHeap");
+		writeDirect("C:/temp/iteratorPairingHeap.csv","PairingHeap.iterator",result);
 	}
 
 	/**
 	 * Tests the {@code PriorityQueue}'s iterator. The time of a complete
 	 * iteration of the heap is measured.
 	 */
-	private void iteratorPriorityQueue() {
+	@Ignore
+	@Test
+	public void iteratorPriorityQueue() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -1164,13 +1252,16 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("Iterator PriorityQueue");
+		writeDirect("C:/temp/iteratorPriorityQueue.csv","PriorityQueue.iterator",result);
 	}
 
 	/**
 	 * Tests the {@code PairingHeap}'s sorted iterator. The time of a complete
 	 * (ordered) iteration of the heap is measured.
 	 */
-	private void iteratorSortedPairingHeap() {
+	@Ignore
+	@Test
+	public void iteratorSortedPairingHeap() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -1191,12 +1282,15 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("IteratorSorted PairingHeap");
+		writeDirect("C:/temp/iteratorSortedPairingHeap.csv","PairingHeap.iteratorSorted",result);
 	}
 
 	/**
 	 * Tests the {@link PairingHeap#keySet()} method.
 	 */
-	private void keySetPairingHeap() {
+	@Ignore
+	@Test
+	public void keySetPairingHeap() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -1214,13 +1308,16 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("KeySet PairingHeap");
+		writeDirect("C:/temp/keySetPairingHeap.csv","PairingHeap.keySet",result);
 	}
 
 	/**
 	 * Tests the {@link PairingHeap#merge(PairingHeap)} method. The heap is
 	 * merged with a different random heap of the same size.
 	 */
-	private void mergePairingHeap() {
+	@Ignore
+	@Test
+	public void mergePairingHeap() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -1239,6 +1336,7 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("Merge PairingHeap");
+		writeDirect("C:/temp/mergePairingHeap.csv","PairingHeap.merge",result);
 	}
 
 	/**
@@ -1246,7 +1344,9 @@ public class PairingHeapAnalysisTest {
 	 * available in {@code PriorityQueue}, the heaps are merged by adding all
 	 * elements of one heap to the other. The two heaps have the same size.
 	 */
-	private void mergePriorityQueue() {
+	@Ignore
+	@Test
+	public void mergePriorityQueue() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -1267,12 +1367,15 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("Merge PriorityQueue");
+		writeDirect("C:/temp/mergePriorityQueue.csv","PriorityQueue.merge",result);
 	}
 
 	/**
 	 * Tests the {@link PairingHeap#values()} method.
 	 */
-	private void valuesPairingHeap() {
+	@Ignore
+	@Test
+	public void valuesPairingHeap() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -1290,12 +1393,15 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("Values PairingHeap");
+		writeDirect("C:/temp/valuesPairingHeap.csv","PairingHeap.values",result);
 	}
 
 	/**
 	 * Tests the {@link PairingHeap#size()} method.
 	 */
-	private void sizePairingHeap() {
+	@Ignore
+	@Test
+	public void sizePairingHeap() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -1313,12 +1419,15 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("Size PairingHeap");
+		writeDirect("C:/temp/sizePairingHeap.csv","PairingHeap.size",result);
 	}
 
 	/**
 	 * Tests the {@link PriorityQueue#size()} method.
 	 */
-	private void sizePriorityQueue() {
+	@Ignore
+	@Test
+	public void sizePriorityQueue() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -1336,12 +1445,15 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("Size PriorityQueue");
+		writeDirect("C:/temp/sizePriorityQueue.csv","PriorityQueue.size",result);
 	}
 
 	/**
 	 * Tests the {@link PairingHeap#toArray()} method.
 	 */
-	private void toArrayPairingHeap() {
+	@Ignore
+	@Test
+	public void toArrayPairingHeap() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -1359,6 +1471,7 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("ToArray PairingHeap");
+		writeDirect("C:/temp/toArrayPairingHeap.csv","PairingHeap.toArray",result);
 	}
 
 	/**
@@ -1366,7 +1479,9 @@ public class PairingHeapAnalysisTest {
 	 * <p>It is assumed that the {@link PriorityQueue#toArray(T[])} method is
 	 * more or less the same, so no test is created for that.</p>
 	 */
-	private void toArrayPriorityQueue() {
+	@Ignore
+	@Test
+	public void toArrayPriorityQueue() {
 		final double[] result = new double[maxSize / sizeIncrement];
 		for(int size = 0;size < maxSize;size += sizeIncrement) {
 			long time = 0;
@@ -1384,6 +1499,7 @@ public class PairingHeapAnalysisTest {
 		}
 		results.add(result);
 		resultsHeaders.add("ToArray PriorityQueue");
+		writeDirect("C:/temp/toArrayPriorityQueue.csv","PriorityQueue.toArray",result);
 	}
 
 /////////////////////////////////HELPER METHODS/////////////////////////////////
@@ -1506,6 +1622,33 @@ public class PairingHeapAnalysisTest {
 	}
 
 	/**
+	 * Writes a single test directly to the specified file.
+	 * @param filename The filename to write the file to.
+	 * @param title The title of the new file.
+	 * @param result The recorded test results to write to the file.
+	 */
+	private void writeDirect(final String filename,final String title,final double result[]) {
+		FileWriter fw = null;
+		try {
+			fw = new FileWriter(filename);
+			try (BufferedWriter bw = new BufferedWriter(fw)) {
+				bw.write("size;");
+				bw.write(title);
+				bw.write("\n");
+				for(int i = 0;i * sizeIncrement < maxSize;i++) {
+					bw.write("" + (i * sizeIncrement));
+					bw.write(";" + result[i]);
+					bw.write("\n");
+				}
+				bw.flush();
+			}
+		} catch(final IOException e) { //Couldn't write to file.
+			e.printStackTrace();
+			return;
+		}
+	}
+
+	/**
 	 * Writes the current results to the file specified in {@code outputFile}.
 	 */
 	private void writeToFile() {
@@ -1521,6 +1664,7 @@ public class PairingHeapAnalysisTest {
 				}
 				bw.write(results.get(results.size() - 1)[i] + "\n");
 			}
+			bw.flush();
 			bw.close();
 		} catch(final FileNotFoundException e) { //Sucks.
 			e.printStackTrace();
