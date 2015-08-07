@@ -1245,7 +1245,7 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 	 * find an isomorphism between this graph and the specified graph. If at
 	 * least one isomorphism exists, it is returned.
 	 * <p>The actual result of this method is that of the VF2 algorithm. The VF2
-	 * algorithm is chosen for its well-documented succes at being a fast
+	 * algorithm is chosen for its well-documented success at being a fast
 	 * practical implementation of the graph isomorphism problem. At the time of
 	 * this writing, it is known as the fastest algorithm on most graphs of any
 	 * reasonable size. However, this algorithm is augmented by a heuristic that
