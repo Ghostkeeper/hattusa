@@ -4,8 +4,10 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/C:/Persoonlijk/Projecten/hattusa/src/net/dulek/collections/HashSet.java</file>
+            <file>file:/C:/Persoonlijk/Projecten/hattusa/src/net/dulek/collections/Pair.java</file>
             <file>file:/C:/Persoonlijk/Projecten/hattusa/test/net/dulek/collections/ArrayListIntTest.java</file>
             <file>file:/C:/Persoonlijk/Projecten/hattusa/src/net/dulek/collections/graph/arc/vertex/Graph.java</file>
+            <file>file:/C:/Persoonlijk/Projecten/hattusa/src/net/dulek/collections/graph/arc/vertex/Arc.java</file>
             <file>file:/C:/Persoonlijk/Projecten/hattusa/src/net/dulek/collections/graph/Graph.java</file>
         </group>
     </open-files>

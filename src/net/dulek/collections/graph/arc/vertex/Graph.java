@@ -603,9 +603,27 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 		throw new UnsupportedOperationException("Not implemented yet.");
 	}
 
+	/**
+	 * Returns whether or not the graph is a subgraph of some other graph. The
+	 * graph {@code G} is a subgraph of the specified graph {@code other} if and
+	 * only if there exists a subset of the vertex set of {@code other} that is
+	 * isomorphic to {@code G}.
+	 * @param other The graph that must be checked whether this graph is a
+	 * subgraph of it.
+	 * @return {@code true} if this graph is a subgraph of {@code other}, or
+	 * false otherwise.
+	 * @throws NullPointerException The specified graph is {@code null}.
+	 */
 	@Override
 	public boolean isSubgraphOf(net.dulek.collections.graph.Graph<Vertex<V,A>,net.dulek.collections.graph.arc.Arc<Vertex<V,A>,A>> other) {
-		throw new UnsupportedOperationException("Not implemented yet.");
+		if(!(other instanceof Graph)) { //If it is a generic graph with my own type of vertex representation and my own type of arc representation, it should be my own type of graph.
+			return false;
+		}
+		@SuppressWarnings("unchecked") //Casting V,A to Object,Object always succeeds.
+		Graph<Object,Object> graph = (Graph<Object,Object>)other;
+
+		//Choose the best algorithm based on the telemetry of the graphs.
+		return subgraphIsomorphismLuksVF2(graph) != null; //There is currently only one implementation, so always choose this...
 	}
 
 	/**
