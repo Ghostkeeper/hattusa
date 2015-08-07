@@ -2021,6 +2021,482 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 	}
 
 	/**
+	 * An implementation of subgraph isomorphism that uses a combination of
+	 * Luks' algorithm and the well-known VF2 algorithm. This algorithm attempts
+	 * to find an isomorphism between this graph and a subgraph of the specified
+	 * graph. If at least one isomorphism exists, it is returned.
+	 * <p>The actual result of this method is that of the VF2 algorithm. The VF2
+	 * algorithm is chosen for its well-documented success at being a fast
+	 * practical implementation of the subgraph isomorphism problem. At the time
+	 * of this writing, it is known as the fastest algorithm on most graphs of
+	 * any reasonable size. However, this algorithm is augmented by a heuristic
+	 * that is inspired by Luks' algorithm proposed in <i>Canonical Labeling of
+	 * Graphs</i> by L. Babai and E.M. Luks in 1983. This heuristic divides the
+	 * graph into simple groups in an attempt to break symmetries in the graph.
+	 * The groups are based on an isomorphism-invariant hash code. Only vertices
+	 * and arcs in the same group can be matched with each other, greatly
+	 * reducing the amount of possibilities for each match.</p>
+	 * <p>This algorithm is tuned for performance in large graphs. In random,
+	 * weakly connected graphs, its expected time complexity is
+	 * {@code O(V+A)^2)}. In the worst case, the time complexity is
+	 * {@code O((V+A)*(V+A)!)}. It has a fairly large constant due to the
+	 * heuristics, but should perform well on large graphs. For small graphs, a
+	 * bare-bones VF2 implementation likely performs better.</p>
+	 * <p>Though this algorithm can also be used to find complete isomorphisms,
+	 * the dedicated method
+	 * {@link #isomorphismLuksVF2(net.dulek.collections.graph.arc.vertex.Graph)}
+	 * is usually faster (unless the graph is very small). This algorithm cannot
+	 * split the graph in as many isomorphism-invariant classes since there may
+	 * be other vertices and arcs present in the specified graph. Also, this
+	 * algorithm lacks many of the early termination criteria available for
+	 * complete isomorphism.</p>
+	 * @param graph The supposed supergraph to find an isomorphism with.
+	 * @return A pair of mappings, the first mapping vertices of this graph to
+	 * vertices of the other graph, and the second mapping arcs of this graph to
+	 * arcs of the other graph. These mappings represent the isomorphism. If no
+	 * isomorphism could be found {@code null} is returned.
+	 */
+	@SuppressWarnings("element-type-mismatch") //Due to data structures containing both arcs and vertices, and calling contains() on them.
+	protected Pair<Map<Vertex<V,A>,Vertex<Object,Object>>,Map<Arc<V,A>,Arc<Object,Object>>> subgraphIsomorphismLuksVF2(final Graph<Object,Object> graph) {
+		final int numVerticesMe = numVertices();
+		final int numVerticesOther = graph.numVertices();
+		final int numArcsMe = numArcs();
+		final int numArcsOther = graph.numArcs();
+		if(numVerticesMe == 0) { //If there are no vertices, there are no arcs either.
+			return new Pair<>(new IdentityHashMap<>(1),new IdentityHashMap<>(1)); //This graph is empty, so an empty mapping is always correct.
+		}
+
+		//As heuristic, we will hash all vertices and arcs, using a subgraph-automorphism-invariant hash, then see if these hashes are identical.
+		//Since this algorithm needs to detect subgraph isomorphism, the only subgraph-automorphism-invariant information available is in the vertex itself: The label.
+		//Compute these hashes and divide the vertices and arcs into equivalence classes based on that hash.
+		final Map<Vertex<V,A>,Integer> vertexHashesMe = new IdentityHashMap<>(numVerticesMe);
+		final Map<Vertex<Object,Object>,Integer> vertexHashesOther = new IdentityHashMap<>(numVerticesOther);
+		final Map<Arc<V,A>,Integer> arcHashesMe = new IdentityHashMap<>(numArcsMe);
+		final Map<Arc<Object,Object>,Integer> arcHashesOther = new IdentityHashMap<>(numArcsOther);
+		//This graph's vertices.
+		final Map<Integer,List<Vertex<V,A>>> vertexClassesMe = new HashMap<>(numVerticesMe);
+		for(final Vertex<V,A> vertex : vertices) { //Compute the hash for all vertices.
+			final int hash = vertex.getLabel().hashCode();
+			vertexHashesMe.put(vertex,hash); //Cache this hash.
+
+			if(!vertexClassesMe.containsKey(hash)) { //Haven't seen this hash yet!
+				List<Vertex<V,A>> equivalenceClass = new ArrayList<>(1);
+				equivalenceClass.add(vertex);
+				vertexClassesMe.put(hash,equivalenceClass);
+			} else { //This hash has been seen before. Add it to that class then.
+				vertexClassesMe.get(hash).add(vertex);
+			}
+		}
+
+		//The other graph's vertices.
+		final Map<Integer,List<Vertex<Object,Object>>> vertexClassesOther = new HashMap<>(numVerticesOther);
+		for(final Vertex<Object,Object> vertex : graph.vertices) { //Compute the hash for all vertices.
+			final int hash = vertex.getLabel().hashCode();
+			vertexHashesOther.put(vertex,hash); //Cache this hash.
+
+			if(!vertexClassesOther.containsKey(hash)) { //Haven't seen this hash yet!
+				List<Vertex<Object,Object>> equivalenceClass = new ArrayList<>(1);
+				equivalenceClass.add(vertex);
+				vertexClassesOther.put(hash,equivalenceClass);
+			} else { //This hash has been seen before. Add it to that class then.
+				vertexClassesOther.get(hash).add(vertex);
+			}
+		}
+
+		//Intermezzo: Check which vertex classes are equal to each other.
+		if(vertexClassesMe.size() >= vertexClassesOther.size()) { //There can't be more classes in this graph than in the other graph.
+			return null;
+		}
+		final Map<List<Vertex<V,A>>,List<Vertex<Object,Object>>> vertexClassMatchings = new IdentityHashMap<>(vertexClassesMe.size());
+		for(final Entry<Integer,List<Vertex<V,A>>> entry : vertexClassesMe.entrySet()) {
+			final Integer key = entry.getKey();
+			final List<Vertex<V,A>> value = entry.getValue();
+			if(!vertexClassesOther.containsKey(key)) { //Hash of this graph is not in the other graph.
+				return null;
+			}
+			final List<Vertex<Object,Object>> otherClass = vertexClassesOther.get(key);
+			if(otherClass.size() != value.size()) { //Equivalence classes have different size.
+				return null;
+			}
+			vertexClassMatchings.put(value,otherClass); //Store this match.
+		}
+
+		//This graph's arcs.
+		final Map<Integer,List<Arc<V,A>>> arcClassesMe = new HashMap<>(numArcsMe);
+		for(final Arc<V,A> arc : arcs) { //Compute the hash for all arcs.
+			final int hash = arc.getLabel().hashCode();
+			arcHashesMe.put(arc,hash); //Cache this hash.
+
+			if(!arcClassesMe.containsKey(hash)) { //Haven't seen this hash yet!
+				List<Arc<V,A>> equivalenceClass = new ArrayList<>(1);
+				equivalenceClass.add(arc);
+				arcClassesMe.put(hash,equivalenceClass);
+			} else { //This hash has been seen before. Add it to that class then.
+				arcClassesMe.get(hash).add(arc);
+			}
+		}
+
+		//The other graph's arcs.
+		final Map<Integer,List<Arc<Object,Object>>> arcClassesOther = new HashMap<>(numArcsOther);
+		for(final Arc<Object,Object> arc : graph.arcs) { //Compute the hash for all arcs.
+			final int hash = arc.getLabel().hashCode();
+			arcHashesOther.put(arc,hash); //Cache this hash.
+
+			if(!arcClassesOther.containsKey(hash)) { //Haven't seen this hash yet!
+				List<Arc<Object,Object>> equivalenceClass = new ArrayList<>(1);
+				equivalenceClass.add(arc);
+				arcClassesOther.put(hash,equivalenceClass);
+			} else { //This hash has been seen before. Add it to that class then.
+				arcClassesOther.get(hash).add(arc);
+			}
+		}
+
+		//Check which arc classes are equal to each other.
+		if(arcClassesMe.size() >= arcClassesOther.size()) { //There can't be more classes in this graph than in the other graph.
+			return null;
+		}
+		final Map<List<Arc<V,A>>,List<Arc<Object,Object>>> arcClassMatchings = new IdentityHashMap<>(arcClassesMe.size());
+		for(final Entry<Integer,List<Arc<V,A>>> entry : arcClassesMe.entrySet()) {
+			final Integer key = entry.getKey();
+			final List<Arc<V,A>> value = entry.getValue();
+			if(!arcClassesOther.containsKey(key)) { //Hash of this graph is not in the other graph.
+				return null;
+			}
+			final List<Arc<Object,Object>> other = arcClassesOther.get(key);
+			if(other.size() != value.size()) { //Equivalence classes have different size.
+				return null;
+			}
+			arcClassMatchings.put(value,other); //Store this match.
+		}
+
+		//Preprocessing for VF2: Sort the classes by size to create a sort of best-first search.
+		final Comparator<List<?>> comparatorListBySize = (a,b) -> (a.size() - b.size()); //Compares lists by their size.
+		final List<List<Vertex<V,A>>> vertexClassesBySizeMe = new ArrayList<>(vertexClassesMe.values()); //First get a list of all classes from the hash map.
+		vertexClassesBySizeMe.sort(comparatorListBySize); //Then sort this list by class size.
+		final List<List<Vertex<Object,Object>>> vertexClassesBySizeOther = new ArrayList<>(vertexClassesMe.size()); //Sort the corresponding classes in the same way.
+		for(final List<Vertex<V,A>> vertexClass : vertexClassesBySizeMe) {
+			vertexClassesBySizeOther.add(vertexClassMatchings.get(vertexClass));
+		} //No need to include the classes that are not in this graph.
+
+		//Finally, the VF2 algorithm will do the actual matching. This part
+		//takes exponential time.
+		//We'll check a subset of permutations pseudo-recursively. The state
+		//vector has the following elements on the call stack:
+		// - The match that was added in the last state. This only stores the
+		//   side of the match on this graph. The other graph's side of the
+		//   match can be looked up in the current matching. Note that this
+		//   callstack contains both vertices and arcs intermixed.
+		// - A class index for iteration over the vertices.
+		// - An index within the current class for iteration over the vertices.
+		// - An index within the current class for iteration over the other
+		//   graph's vertices and arcs, to match with the currently being
+		//   matched vertex or arc.
+		//This is a lot of administration to keep track of, but I could think of
+		//no better way to have access to all this information, and all of it is
+		//required for this hybrid algorithm of Luks and VF2.
+
+		//The algorithm will always first attempt to find a match in the current
+		//front (the set of arcs and vertices neighbouring to the already
+		//matched arcs and vertices). The frontMe variable is a stack that
+		//results in a depth-first search. If the front is empty but not all
+		//vertices are matched yet, that means that the graph is not connected,
+		//and a new unmatched vertex must be found. This is where the
+		//vertexClassIndex and vertexIndexMe variables are used: Track the
+		//current state of iteration to make sure every vertex is matched (the
+		//arcs must always be in the same connected component as a vertex, so
+		//they need not be iterated over).
+		final Map<Vertex<V,A>,Vertex<Object,Object>> vertexMatching = new IdentityHashMap<>(numVerticesMe); //Keeps track of the current matching.
+		final Map<Arc<V,A>,Arc<Object,Object>> arcMatching = new IdentityHashMap<>(numArcsMe);
+		final Set<Vertex<Object,Object>> matchedVerticesOther = new IdentityHashSet<>(numVerticesMe); //Quick look-up of which arcs and vertices of the other graph are matched.
+		final Set<Arc<Object,Object>> matchedArcsOther = new IdentityHashSet<>(numArcsMe);
+		final int totalElements = numVerticesMe + numArcsMe;
+		final Deque<Object> callStackMatches = new ArrayDeque<>(totalElements); //History of matched vertices and arcs from this graph. The matched vertices and arcs from the other graph are found via the mappings.
+		final Deque<Integer> callStackVertexClassIndex = new ArrayDeque<>(totalElements); //History of where these vertices and arcs were found.
+		final Deque<Integer> callStackVertexIndexMe = new ArrayDeque<>(totalElements);
+		final Deque<Integer> callStackIndexOther = new ArrayDeque<>(totalElements);
+		final Deque<Object> frontMe = new ArrayDeque<>((int)Math.sqrt(totalElements)); //Stack of yet unexplored vertices and arcs that border the explored vertices and arcs.
+		final Set<Object> frontOther = new IdentityHashSet<>((int)Math.sqrt(totalElements));
+		int vertexClassIndex = 0; //Current position in the list of vertex classes of both graphs.
+		int vertexIndexMe = 0; //Current position in the current vertex class of this graph.
+		int indexOther = 0; //Current position in the current vertex or arc class of the other graph.
+		ADDMATCH:
+		while(!frontMe.isEmpty() || vertexClassIndex < vertexClassesBySizeMe.size()) { //Termination criterium for not finding a match: Front is empty and we've exhausted all starting points.
+			if(!frontMe.isEmpty()) { //Then also !frontOther.isEmpty(). There are arcs or vertices in the front. Process those first.
+				final Object nextElement = frontMe.pop(); //Pick a new arc or vertex to match.
+				if(nextElement instanceof Vertex) { //This is a vertex.
+					@SuppressWarnings("unchecked") //Safe, due to the instanceof check and frontMe contains only vertices and arcs from this graph.
+					final Vertex<V,A> nextVertex = (Vertex<V,A>)nextElement;
+					final Integer hash = vertexHashesMe.get(nextVertex);
+					final List<Vertex<Object,Object>> correspondingClass = vertexClassesOther.get(hash);
+					FINDMATCH:
+					for(;indexOther < correspondingClass.size();indexOther++) {
+						final Vertex<Object,Object> matchedVertex = correspondingClass.get(indexOther);
+						if(!frontOther.contains(matchedVertex)) {
+							continue; //This vertex is not in the front. Skip it.
+						}
+						for(final Arc<V,A> arc : nextVertex.incomingArcs()) { //For all matched neighbouring arcs, see if the matching arc is also a neighbour on the other side.
+							if(arcMatching.containsKey(arc) && !matchedVertex.incomingArcs().contains(arcMatching.get(arc))) { //No such arc is here! No match!
+								continue FINDMATCH; //So pick another vertex to match with.
+							}
+						}
+						for(final Arc<V,A> arc : nextVertex.outgoingArcs()) {
+							if(arcMatching.containsKey(arc) && !matchedVertex.outgoingArcs().contains(arcMatching.get(arc))) { //No such arc is here! No match!
+								continue FINDMATCH; //So pick another vertex to match with.
+							}
+						}
+						//Seemingly successful match. Let's add this match to the state.
+						vertexMatching.put(nextVertex,matchedVertex); //Add the match to the current mapping.
+						matchedVerticesOther.add(matchedVertex);
+						callStackMatches.push(nextVertex); //Add a state to the call stack.
+						callStackVertexClassIndex.push(vertexClassIndex);
+						callStackVertexIndexMe.push(vertexIndexMe);
+						callStackIndexOther.push(indexOther);
+						frontOther.remove(matchedVertex); //The me-vertex was already removed from the front when getting the next element from the stack, but this one wasn't yet.
+						ADDFRONTINCOMINGARCS:
+						for(final Arc<V,A> arc : nextVertex.incomingArcs()) { //Add all unmatched neighbours of the matched vertices to the front.
+							if(!arcMatching.containsKey(arc)) { //Don't re-add already matched neighbours or in the front.
+								for(final Vertex<V,A> vertex : arc.sourceEndpoints()) { //If they have neighbours that are already matched, they are already in the front.
+									if(vertexMatching.containsKey(vertex)) {
+										continue ADDFRONTINCOMINGARCS;
+									}
+								}
+								for(final Vertex<V,A> vertex : arc.destinationEndpoints()) {
+									if(vertexMatching.containsKey(vertex)) {
+										continue ADDFRONTINCOMINGARCS;
+									}
+								}
+								frontMe.push(arc);
+							}
+						}
+						ADDFRONTOUTGOINGARCS:
+						for(final Arc<V,A> arc : nextVertex.outgoingArcs()) {
+							if(!arcMatching.containsKey(arc)) {
+								for(final Vertex<V,A> vertex : arc.sourceEndpoints()) { //If they have neighbours that are already matched, they are already in the front.
+									if(vertexMatching.containsKey(vertex)) {
+										continue ADDFRONTOUTGOINGARCS;
+									}
+								}
+								for(final Vertex<V,A> vertex : arc.destinationEndpoints()) {
+									if(vertexMatching.containsKey(vertex)) {
+										continue ADDFRONTOUTGOINGARCS;
+									}
+								}
+								frontMe.push(arc);
+							}
+						}
+						for(final Arc<Object,Object> arc : matchedVertex.incomingArcs()) { //Also for the other graph.
+							if(!matchedArcsOther.contains(arc)) {
+								frontOther.add(arc); //Since this one is a set, no need to check if it's already in the front.
+							}
+						}
+						for(final Arc<Object,Object> arc : matchedVertex.outgoingArcs()) {
+							if(!matchedArcsOther.contains(arc)) {
+								frontOther.add(arc);
+							}
+						}
+						continue ADDMATCH; //Try to match further.
+					}
+				} else { //This is an arc.
+					@SuppressWarnings("unchecked") //Safe, because frontMe contains only vertices and arcs from this graph and it is not a vertex.
+					final Arc<V,A> nextArc = (Arc<V,A>)nextElement;
+					final Integer hash = arcHashesMe.get(nextArc);
+					final List<Arc<Object,Object>> correspondingClass = arcClassesOther.get(hash);
+					FINDMATCH:
+					for(;indexOther < correspondingClass.size();indexOther++) {
+						final Arc<Object,Object> matchedArc = correspondingClass.get(indexOther);
+						if(!frontOther.contains(matchedArc)) {
+							continue; //This arc is not in the front. Skip it.
+						}
+						for(final Vertex<V,A> vertex : nextArc.sourceEndpoints()) { //For all matched neighbouring vertices, see if the matching vertex is also a neighbour on the other side.
+							if(vertexMatching.containsKey(vertex) && !matchedArc.sourceEndpoints().contains(vertexMatching.get(vertex))) { //No such vertex is here! No match!
+								continue FINDMATCH; //So pick another arc to match with.
+							}
+						}
+						for(final Vertex<V,A> vertex : nextArc.destinationEndpoints()) {
+							if(vertexMatching.containsKey(vertex) && !matchedArc.destinationEndpoints().contains(vertexMatching.get(vertex))) { //No such vertex is here! No match!
+								continue FINDMATCH; //So pick another arc to match with.
+							}
+						}
+						//Seemingly successful match. Let's add this match to the state.
+						arcMatching.put(nextArc,matchedArc); //Add the match to the current mapping.
+						matchedArcsOther.add(matchedArc);
+						callStackMatches.push(nextArc); //Add a state to the call stack.
+						callStackVertexClassIndex.push(vertexClassIndex);
+						callStackVertexIndexMe.push(vertexIndexMe);
+						callStackIndexOther.push(indexOther);
+						frontOther.remove(matchedArc); //The me-arc was already removed from the front when getting the next element from the stack, but this one wasn't yet.
+						ADDFRONTSOURCEVERTICES:
+						for(final Vertex<V,A> vertex : nextArc.sourceEndpoints()) { //Add all unmatched neighbours of the matched arcs to the front.
+							if(!vertexMatching.containsKey(vertex)) { //Don't re-add already matched neighbours or vertices in the front.
+								for(final Arc<V,A> arc : vertex.incomingArcs()) { //If they have neighbours that are already matched, they are in the front.
+									if(arcMatching.containsKey(arc)) {
+										continue ADDFRONTSOURCEVERTICES;
+									}
+								}
+								for(final Arc<V,A> arc : vertex.outgoingArcs()) {
+									if(arcMatching.containsKey(arc)) {
+										continue ADDFRONTSOURCEVERTICES;
+									}
+								}
+								frontMe.push(vertex);
+							}
+						}
+						ADDFRONTDESTINATIONVERTICES:
+						for(final Vertex<V,A> vertex : nextArc.destinationEndpoints()) {
+							if(!vertexMatching.containsKey(vertex)) {
+								for(final Arc<V,A> arc : vertex.incomingArcs()) { //If they have neighbours that are already matched, they are in the front.
+									if(arcMatching.containsKey(arc)) {
+										continue ADDFRONTDESTINATIONVERTICES;
+									}
+								}
+								for(final Arc<V,A> arc : vertex.outgoingArcs()) {
+									if(arcMatching.containsKey(arc)) {
+										continue ADDFRONTDESTINATIONVERTICES;
+									}
+								}
+								frontMe.push(vertex);
+							}
+						}
+						for(final Vertex<Object,Object> vertex : matchedArc.sourceEndpoints()) { //Also for the other graph.
+							if(!matchedVerticesOther.contains(vertex)) {
+								frontOther.add(vertex); //Since this one is a set, no need to check if it's already in the front.
+							}
+						}
+						for(final Vertex<Object,Object> vertex : matchedArc.destinationEndpoints()) {
+							if(!matchedVerticesOther.contains(vertex)) {
+								frontOther.add(vertex);
+							}
+						}
+						continue ADDMATCH; //Try to match further.
+					}
+				}
+				//None of the available vertices in the corresponding class can be matched. Backtrack!
+				final Object lastElement = callStackMatches.pop();
+				if(lastElement instanceof Vertex) { //Was it a vertex or an arc?
+					@SuppressWarnings("unchecked") //Safe, because frontMe contains only vertices and arcs from this graph, and according to instanceof it is a vertex.
+					final Vertex<V,A> lastVertex = (Vertex<V,A>)lastElement;
+					final Vertex<Object,Object> matchedVertex = vertexMatching.get(lastVertex);
+					vertexMatching.remove(lastVertex); //Cancel the matching.
+					matchedVerticesOther.remove(matchedVertex);
+					vertexClassIndex = callStackVertexClassIndex.pop(); //Restore the state.
+					vertexIndexMe = callStackVertexIndexMe.pop();
+					indexOther = callStackIndexOther.pop();
+					indexOther++; //But skip the match that turned out to be wrong.
+					//To restore the front, we need to remove the neighbouring arcs of this vertex from the front, but not those neighbours that are also neighbour of other matched vertices.
+					final Deque<Arc<V,A>> doublyConnectedFront = new ArrayDeque<>(lastVertex.incomingArcs().size() + lastVertex.outgoingArcs().size()); //Some trickery is required to be able to remove elements from frontMe that are not on top, since it's a stack.
+					CHECKDOUBLYCONNECTEDARCS:
+					while(lastVertex.incomingArcs().contains(frontMe.peekLast()) || lastVertex.outgoingArcs().contains(frontMe.peekLast())) { //Luckily, all neighbours are at the top of this stack per the DFS.
+						@SuppressWarnings("unchecked") //Safe, because it must be an arc due to the while condition.
+						final Arc<V,A> frontArc = (Arc<V,A>)frontMe.pop();
+						for(final Vertex<V,A> frontArcNeighbour : frontArc.sourceEndpoints()) { //If any of its neighbours is already explored, this arc should remain in the front.
+							if(vertexMatching.containsKey(frontArcNeighbour)) { //Note that lastVertex was already removed.
+								doublyConnectedFront.add(frontArc);
+								continue CHECKDOUBLYCONNECTEDARCS;
+							}
+						}
+						for(final Vertex<V,A> frontArcNeighbour : frontArc.destinationEndpoints()) {
+							if(vertexMatching.containsKey(frontArcNeighbour)) {
+								doublyConnectedFront.add(frontArc);
+								continue CHECKDOUBLYCONNECTEDARCS;
+							}
+						}
+					}
+					for(final Arc<V,A> doublyConnectedArc : doublyConnectedFront) { //Re-add all arcs that were doubly connected.
+						frontMe.push(doublyConnectedArc);
+					}
+					frontMe.push(lastVertex); //And re-add the vertex. It should now be on top and be selected first in the next iteration of VF2.
+					CHECKDOUBLYCONNECTEDARCSOTHER:
+					for(final Arc<Object,Object> frontArc : matchedVertex.incomingArcs()) { //Also restore the other's front, but that is a bit easier since it is just a set.
+						for(final Vertex<Object,Object> frontArcNeighbour : frontArc.sourceEndpoints()) { //If any of its neighbours is already explored, this arc should remain in the front.
+							if(matchedVerticesOther.contains(frontArcNeighbour)) { //Note that matchedVertex was already removed.
+								continue CHECKDOUBLYCONNECTEDARCSOTHER; //Doubly connected.
+							}
+						}
+						for(final Vertex<Object,Object> frontArcNeighbour : frontArc.destinationEndpoints()) {
+							if(matchedVerticesOther.contains(frontArcNeighbour)) {
+								continue CHECKDOUBLYCONNECTEDARCSOTHER; //Doubly connected.
+							}
+						}
+						frontOther.remove(frontArc); //Not doubly connected, so remove from the front.
+					}
+					frontOther.add(matchedVertex); //Re-add the vertex.
+				} else { //The last element was an arc.
+					@SuppressWarnings("unchecked") //Safe, because frontMe contains only vertices and arcs of this graph and it is not a vertex.
+					final Arc<V,A> lastArc = (Arc<V,A>)lastElement; //Upcoming Indiana Jones film?
+					final Arc<Object,Object> matchedArc = arcMatching.get(lastArc);
+					arcMatching.remove(lastArc); //Cancel the matching.
+					matchedArcsOther.remove(matchedArc);
+					vertexClassIndex = callStackVertexClassIndex.pop(); //Restore the state.
+					vertexIndexMe = callStackVertexIndexMe.pop();
+					indexOther = callStackIndexOther.pop();
+					indexOther++; //But skip the match that turned out to be wrong.
+					//To restore the front, we need to remove the neighbouring vertices of this arc from the front, but not those neighbours that are also neighbour of other matched arcs.
+					final Deque<Vertex<V,A>> doublyConnectedFront = new ArrayDeque<>(lastArc.sourceEndpoints().size() + lastArc.destinationEndpoints().size()); //Some trickery is required to be able to remove elements from frontMe that are not on top, since it's a stack.
+					CHECKDOUBLYCONNECTEDVERTICES:
+					while(lastArc.sourceEndpoints().contains(frontMe.peekLast()) || lastArc.destinationEndpoints().contains(frontMe.peekLast())) { //Luckily, all neighbours are at the top of this stack per the DFS.
+						@SuppressWarnings("unchecked") //Safe cast, because it must be a vertex due to the while condition.
+						final Vertex<V,A> frontVertex = (Vertex<V,A>)frontMe.pop();
+						for(final Arc<V,A> frontVertexNeighbour : frontVertex.incomingArcs()) { //If any of its neighbours is already explored, this vertex should remain in the front.
+							if(arcMatching.containsKey(frontVertexNeighbour)) { //Note that lastArc was already removed.
+								doublyConnectedFront.add(frontVertex);
+								continue CHECKDOUBLYCONNECTEDVERTICES;
+							}
+						}
+						for(final Arc<V,A> frontVertexNeighbour : frontVertex.outgoingArcs()) {
+							if(arcMatching.containsKey(frontVertexNeighbour)) {
+								doublyConnectedFront.add(frontVertex);
+								continue CHECKDOUBLYCONNECTEDVERTICES;
+							}
+						}
+					}
+					for(final Vertex<V,A> doublyConnectedVertex : doublyConnectedFront) { //Re-add all vertices that were doubly connected.
+						frontMe.push(doublyConnectedVertex);
+					}
+					frontMe.push(lastArc); //And re-add the arc. It should now be on top and be selected first in the next iteration of VF2.
+					CHECKDOUBLYCONNECTEDVERTICESOTHER:
+					for(final Vertex<Object,Object> frontVertex : matchedArc.sourceEndpoints()) { //Also restore the other's front, but that is a bit easier since it is just a set.
+						for(final Arc<Object,Object> frontVertexNeighbour : frontVertex.incomingArcs()) { //If any of its neighbours is already explored, this vertex should remain in the front.
+							if(matchedArcsOther.contains(frontVertexNeighbour)) { //Note that matchedArc was already removed.
+								continue CHECKDOUBLYCONNECTEDVERTICESOTHER;
+							}
+						}
+						for(final Arc<Object,Object> frontVertexNeighbour : frontVertex.outgoingArcs()) {
+							if(matchedArcsOther.contains(frontVertexNeighbour)) {
+								continue CHECKDOUBLYCONNECTEDVERTICESOTHER; //Doubly connected.
+							}
+						}
+						frontOther.remove(frontVertex); //Not doubly connected, so remove from the front.
+					}
+					frontOther.add(matchedArc); //Re-add the arc.
+				}
+			} else { //No arcs or vertices left in this connected component. Pick a new vertex to start from.
+				//This if-statement is executed in three cases:
+				// - The start of the algorithm. No vertices or arcs are explored. It needs a starting point. The vertexIndex and vertexClassIndex are 0 so it picks the first one.
+				// - A connected component is matched but the graph is disconnected. It needs a new starting point. It finds the next vertexIndex and vertexClassIndex that is not yet matched.
+				// - The last connected component is matched. All vertices and arcs are matched. It is an isomorphism.
+				do {
+					vertexIndexMe++; //Get a new vertex.
+					if(vertexIndexMe >= vertexClassesBySizeMe.get(vertexClassIndex).size()) { //This vertex class is exhausted. Try the next.
+						vertexClassIndex++;
+						if(vertexClassIndex >= vertexClassesBySizeMe.size()) { //All vertex classes are exhausted! All are matched. We have a match!
+							return new Pair<>(vertexMatching,arcMatching); //Return the current matches.
+						}
+						vertexIndexMe = 0;
+					}
+				} while(vertexMatching.containsKey(vertexClassesBySizeMe.get(vertexClassIndex).get(vertexIndexMe))); //Repeat until we find a vertex that is not yet matched.
+				for(indexOther = 0;matchedVerticesOther.contains(vertexClassesBySizeOther.get(vertexClassIndex).get(indexOther));indexOther++) { //Find an unmatched vertex to match it with.
+					if(indexOther >= vertexClassesBySizeOther.get(vertexClassIndex).size()) { //Shouldn't happen, right? Well anyway, if no vertex is available to match with, no match can be found.
+						return null;
+					}
+				}
+				frontMe.add(vertexClassesBySizeMe.get(vertexClassIndex).get(vertexIndexMe));
+				frontOther.add(vertexClassesBySizeOther.get(vertexClassIndex).get(indexOther));
+			}
+		}
+		return null; //Front is empty and we've exhausted all starting points, but no match.
+	}
+
+	/**
 	 * This set contains the arcs in a graph. It is returned by the
 	 * {@link #arcs()} method. This implementation ensures that modifying the
 	 * arc set will modify the accompanying graph accordingly.
