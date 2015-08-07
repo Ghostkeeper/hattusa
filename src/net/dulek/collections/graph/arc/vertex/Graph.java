@@ -1222,18 +1222,6 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 	}
 
 	/**
-	 * Removes the specified arc from the set of arcs of this graph. The arc is
-	 * only removed from the arc set of the graph. If the operation would cause
-	 * the graph to become invalid, an {@code IllegalStateException} is thrown.
-	 * @param arc The arc to remove from the set of arcs of this graph.
-	 * @throws IllegalStateException Removing the arc from the arc set would
-	 * cause the graph to become invalid.
-	 */
-	protected void removeInternal(final Arc<V,A> arc) {
-		arcs.removeInternal(arc);
-	}
-
-	/**
 	 * An implementation of graph isomorphism that uses a combination of Luks'
 	 * algorithm and the well-known VF2 algorithm. This algorithm attempts to
 	 * find an isomorphism between this graph and the specified graph. If at
@@ -1988,6 +1976,18 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 			}
 		}
 		return null; //Front is empty and we've exhausted all starting points, but no match.
+	}
+
+	/**
+	 * Removes the specified arc from the set of arcs of this graph. The arc is
+	 * only removed from the arc set of the graph. If the operation would cause
+	 * the graph to become invalid, an {@code IllegalStateException} is thrown.
+	 * @param arc The arc to remove from the set of arcs of this graph.
+	 * @throws IllegalStateException Removing the arc from the arc set would
+	 * cause the graph to become invalid.
+	 */
+	protected void removeInternal(final Arc<V,A> arc) {
+		arcs.removeInternal(arc);
 	}
 
 	/**
