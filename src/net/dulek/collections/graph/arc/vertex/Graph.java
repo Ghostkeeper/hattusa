@@ -1313,9 +1313,9 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 
 		//Next, compute the actual hashes and divide the vertices and arcs into equivalence classes based on that hash.
 		final Map<Vertex<V,A>,Long> vertexHashesMe = new IdentityHashMap<>(numVerticesMe);
-		final Map<Vertex<Object,Object>,Long> vertexHashesOther = new IdentityHashMap<>(numVerticesMe);
+		final Map<Vertex<Object,Object>,Long> vertexHashesOther = new IdentityHashMap<>(numVerticesOther);
 		final Map<Arc<V,A>,Long> arcHashesMe = new IdentityHashMap<>(numArcsMe);
-		final Map<Arc<Object,Object>,Long> arcHashesOther = new IdentityHashMap<>(numArcsMe);
+		final Map<Arc<Object,Object>,Long> arcHashesOther = new IdentityHashMap<>(numArcsOther);
 		//This graph's vertices.
 		final Map<Long,List<Vertex<V,A>>> vertexClassesMe = new HashMap<>(numVerticesMe);
 		for(final Vertex<V,A> vertex : vertices) { //Compute the actual hash for all vertices.
@@ -1574,8 +1574,8 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 			Set<Arc<Object,Object>> todoArcs = new IdentityHashSet<>(1); //Arcs we still have to process in this layer.
 			todoArcs.add(arc);
 			Set<Vertex<Object,Object>> todoVertices; //Vertices we still have to process in this layer.
-			final Set<Arc<Object,Object>> doneArcs = new IdentityHashSet<>(numArcsMe); //Arcs we don't want to process again.
-			final Set<Vertex<Object,Object>> doneVertices = new IdentityHashSet<>(numVerticesMe); //Vertices we don't want to process again.
+			final Set<Arc<Object,Object>> doneArcs = new IdentityHashSet<>(numArcsOther); //Arcs we don't want to process again.
+			final Set<Vertex<Object,Object>> doneVertices = new IdentityHashSet<>(numVerticesOther); //Vertices we don't want to process again.
 			while(!todoArcs.isEmpty()) {
 				layer++;
 				todoVertices = new IdentityHashSet<>(todoArcs.size()); //Prepare a set of vertices to traverse afterwards.
