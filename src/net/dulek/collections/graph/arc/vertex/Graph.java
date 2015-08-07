@@ -433,7 +433,7 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 		@SuppressWarnings("unchecked") //Casting to Object will always succeed. It is known to be a graph due to the instanceof check earlier.
 		final Graph<Object,Object> graph = (Graph)obj;
 
-		//Choose the best implementation based on the telemetrics of the graphs.
+		//Choose the best implementation based on the telemetry of the graphs.
 		return isomorphismLuksVF2(graph) != null; //There is currently only one implementation, so always choose this...
 	}
 
