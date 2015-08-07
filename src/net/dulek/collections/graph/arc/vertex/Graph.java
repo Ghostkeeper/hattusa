@@ -1266,11 +1266,12 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 	 * vertices of the other graph, and the second mapping arcs of this graph to
 	 * arcs of the other graph. These mappings represent the isomorphism. If no
 	 * isomorphism could be found {@code null} is returned.
+	 * @throws NullPointerException The specified graph is {@code null}.
 	 */
 	@SuppressWarnings("element-type-mismatch") //Due to data structures containing both arcs and vertices, and calling contains() on them.
 	protected Pair<Map<Vertex<V,A>,Vertex<Object,Object>>,Map<Arc<V,A>,Arc<Object,Object>>> isomorphismLuksVF2(final Graph<Object,Object> graph) {
 		final int numVerticesMe = numVertices();
-		final int numVerticesOther = graph.numVertices();
+		final int numVerticesOther = graph.numVertices(); //May throw NullPointerException if graph is null.
 		final int numArcsMe = numArcs();
 		final int numArcsOther = graph.numArcs();
 		if(numVerticesMe != numVerticesOther || numArcsMe != numArcsOther) {
@@ -2055,11 +2056,12 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 	 * vertices of the other graph, and the second mapping arcs of this graph to
 	 * arcs of the other graph. These mappings represent the isomorphism. If no
 	 * isomorphism could be found {@code null} is returned.
+	 * @throws NullPointerException The specified graph is {@code null}.
 	 */
 	@SuppressWarnings("element-type-mismatch") //Due to data structures containing both arcs and vertices, and calling contains() on them.
 	protected Pair<Map<Vertex<V,A>,Vertex<Object,Object>>,Map<Arc<V,A>,Arc<Object,Object>>> subgraphIsomorphismLuksVF2(final Graph<Object,Object> graph) {
 		final int numVerticesMe = numVertices();
-		final int numVerticesOther = graph.numVertices();
+		final int numVerticesOther = graph.numVertices(); //Throws NullPointerException if graph is null.
 		final int numArcsMe = numArcs();
 		final int numArcsOther = graph.numArcs();
 		if(numVerticesMe == 0) { //If there are no vertices, there are no arcs either.
