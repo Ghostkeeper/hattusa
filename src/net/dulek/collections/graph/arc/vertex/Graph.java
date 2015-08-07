@@ -1751,6 +1751,9 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 						if(!frontOther.contains(matchedVertex)) {
 							continue; //This vertex is not in the front. Skip it.
 						}
+						if(!matchedVertex.getLabel().equals(nextVertex.getLabel())) {
+							continue; //Labels are not equal.
+						}
 						for(final Arc<V,A> arc : nextVertex.incomingArcs()) { //For all matched neighbouring arcs, see if the matching arc is also a neighbour on the other side.
 							if(arcMatching.containsKey(arc) && !matchedVertex.incomingArcs().contains(arcMatching.get(arc))) { //No such arc is here! No match!
 								continue FINDMATCH; //So pick another vertex to match with.
@@ -1823,6 +1826,9 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 						final Arc<Object,Object> matchedArc = correspondingClass.get(indexOther);
 						if(!frontOther.contains(matchedArc)) {
 							continue; //This arc is not in the front. Skip it.
+						}
+						if(!matchedArc.getLabel().equals(nextArc.getLabel())) {
+							continue; //Labels are not equal.
 						}
 						for(final Vertex<V,A> vertex : nextArc.sourceEndpoints()) { //For all matched neighbouring vertices, see if the matching vertex is also a neighbour on the other side.
 							if(vertexMatching.containsKey(vertex) && !matchedArc.sourceEndpoints().contains(vertexMatching.get(vertex))) { //No such vertex is here! No match!
@@ -2254,6 +2260,9 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 						if(!frontOther.contains(matchedVertex)) {
 							continue; //This vertex is not in the front. Skip it.
 						}
+						if(!matchedVertex.getLabel().equals(nextVertex.getLabel())) {
+							continue; //Labels are not equal.
+						}
 						for(final Arc<V,A> arc : nextVertex.incomingArcs()) { //For all matched neighbouring arcs, see if the matching arc is also a neighbour on the other side.
 							if(arcMatching.containsKey(arc) && !matchedVertex.incomingArcs().contains(arcMatching.get(arc))) { //No such arc is here! No match!
 								continue FINDMATCH; //So pick another vertex to match with.
@@ -2326,6 +2335,9 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 						final Arc<Object,Object> matchedArc = correspondingClass.get(indexOther);
 						if(!frontOther.contains(matchedArc)) {
 							continue; //This arc is not in the front. Skip it.
+						}
+						if(!matchedArc.getLabel().equals(nextArc.getLabel())) {
+							continue; //Labels are not equal.
 						}
 						for(final Vertex<V,A> vertex : nextArc.sourceEndpoints()) { //For all matched neighbouring vertices, see if the matching vertex is also a neighbour on the other side.
 							if(vertexMatching.containsKey(vertex) && !matchedArc.sourceEndpoints().contains(vertexMatching.get(vertex))) { //No such vertex is here! No match!
