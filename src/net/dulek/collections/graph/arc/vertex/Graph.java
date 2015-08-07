@@ -1288,7 +1288,7 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 		final Map<Object,Integer> arcLabelHashesOther = new IdentityHashMap<>(numArcsOther);
 		for(final Vertex<V,A> vertex : vertices) { //Compute the hash for all vertex labels.
 			final V label = vertex.getLabel();
-			if(!vertexLabelHashesMe.containsKey(label)) {
+			if(!vertexLabelHashesMe.containsKey(label)) { //Don't recompute this hash. It might be expensive.
 				vertexLabelHashesMe.put(label,label == null ? 0 : label.hashCode());
 			}
 		}
