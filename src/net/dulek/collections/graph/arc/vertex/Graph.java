@@ -1457,7 +1457,7 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 					doneArcs.add(arc); //Don't visit this arc ever again.
 				}
 			}
-			vertexHashesOther.put(vertex,hash);
+			vertexHashesOther.put(vertex,hash); //Cache this hash.
 
 			if(!vertexClassesMe.containsKey(hash)) { //This hash is not in this graph.
 				return null;
@@ -1555,7 +1555,7 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 					doneVertices.add(vertex); //Don't visit this vertex ever again.
 				}
 			}
-			arcHashesMe.put(arc,hash);
+			arcHashesMe.put(arc,hash); //Cache this hash.
 
 			if(!arcClassesMe.containsKey(hash)) { //Haven't seen this hash yet!
 				List<Arc<V,A>> equivalenceClass = new ArrayList<>(1);
@@ -1631,7 +1631,7 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 					doneVertices.add(vertex); //Don't visit this vertex ever again.
 				}
 			}
-			arcHashesOther.put(arc,hash);
+			arcHashesOther.put(arc,hash); //Cache this hash.
 
 			if(!arcClassesMe.containsKey(hash)) { //This hash is not in this graph.
 				return null;
