@@ -319,9 +319,86 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 		return arc.destinationEndpoints(); //Method call throws NullPointerException by itself if null.
 	}
 
+	/**
+	 * Removes or modifies arcs such that there exists no more arc with
+	 * {@code from} in its source and {@code to} in its destination. Every arc
+	 * with {@code from} in its source and {@code to} in its destination will be
+	 * removed. If there were hyperarcs connecting other vertices with each
+	 * other too, then new arcs will be created to ensure that those other
+	 * vertices will remain connected. The removed arcs will be returned. If
+	 * this is a hypergraph or a multigraph, this set may have more than one
+	 * element.
+	 * @param from The source of the arcs that need to be removed.
+	 * @param to The destination of the arcs that need to be removed.
+	 * @return A set of all arcs that were removed.
+	 * @throws IllegalStateException Removing all arcs between the specified
+	 * vertices would cause the graph to become invalid.
+	 * @throws NullPointerException At least one of the specified vertices is
+	 * {@code null}.
+	 */
 	@Override
 	public Set<? extends Arc<V,A>> disconnect(final Vertex<V,A> from,final Vertex<V,A> to) {
-		throw new UnsupportedOperationException("Not implemented yet.");
+		final Set<Arc<V,A>> removedArcs = new IdentityHashSet<>(1);
+		if(from.outgoingArcs().size() < to.incomingArcs().size()) { //Fastest to start from the from-vertex. Throws NullPointerException if one of these is null.
+			for(final Arc<V,A> arc : from.outgoingArcs()) { //For all neighbouring arcs, remove the connection to the to-vertex.
+				for(final Vertex<V,A> vertex : arc.destinationEndpoints()) {
+					if(vertex == to) { //This is the forbidden vertex.
+						removeArc(arc);
+						removedArcs.add(arc);
+						if(arc.sourceEndpoints().size() > 1 && arc.destinationEndpoints().size() > 1) { //A hyperarc with multiple vertices at both sides.
+							final Arc<V,A> connectingArc = arc.clone();
+							connectingArc.removeFromSourceInternal(from); //This one is connected to neither, but only connects the other vertices with each other.
+							connectingArc.removeFromDestinationInternal(to);
+							addInternal(connectingArc);
+						}
+						if(arc.sourceEndpoints().size() > 1) { //There were multiple source vertices.
+							final Arc<V,A> connectingArc = arc.clone();
+							connectingArc.removeFromSource(from);
+							connectingArc.clearDestinationInternal(); //Now connect these only to the to-vertex.
+							connectingArc.addToDestinationInternal(to);
+							addInternal(connectingArc);
+						}
+						if(arc.destinationEndpoints().size() > 1) { //There were multiple destination vertices.
+							final Arc<V,A> connectingArc = arc.clone();
+							connectingArc.removeFromDestination(to);
+							connectingArc.clearSourceInternal(); //Now connect these only to the from-vertex.
+							connectingArc.addToSourceInternal(from);
+							addInternal(connectingArc);
+						}
+					}
+				}
+			}
+			return removedArcs;
+		}
+		for(final Arc<V,A> arc : to.incomingArcs()) { //For all neighbouring arcs, remove the connection to the to-vertex.
+			for(final Vertex<V,A> vertex : arc.sourceEndpoints()) {
+				if(vertex == from) { //This is the forbidden vertex.
+					removeArc(arc);
+					removedArcs.add(arc);
+					if(arc.sourceEndpoints().size() > 1 && arc.destinationEndpoints().size() > 1) { //A hyperarc with multiple vertices at both sides.
+						final Arc<V,A> connectingArc = arc.clone();
+						connectingArc.removeFromSourceInternal(from); //This one is connected to neither, but only connects the other vertices with each other.
+						connectingArc.removeFromDestinationInternal(to);
+						addInternal(connectingArc);
+					}
+					if(arc.sourceEndpoints().size() > 1) { //There were multiple source vertices.
+						final Arc<V,A> connectingArc = arc.clone();
+						connectingArc.removeFromSource(from);
+						connectingArc.clearDestinationInternal(); //Now connect these only to the to-vertex.
+						connectingArc.addToDestinationInternal(to);
+						addInternal(connectingArc);
+					}
+					if(arc.destinationEndpoints().size() > 1) { //There were multiple destination vertices.
+						final Arc<V,A> connectingArc = arc.clone();
+						connectingArc.removeFromDestination(to);
+						connectingArc.clearSourceInternal(); //Now connect these only to the from-vertex.
+						connectingArc.addToSourceInternal(from);
+						addInternal(connectingArc);
+					}
+				}
+			}
+		}
+		return removedArcs;
 	}
 
 	/**

@@ -113,6 +113,7 @@ public abstract class Arc<V,A> implements net.dulek.collections.graph.arc.Arc<Ve
 
 	@Override
 	public Arc<V,A> clone() {
+		//Note: Do NOT perform a deep clone!
 		throw new UnsupportedOperationException("Not implemented yet.");
 	}
 
