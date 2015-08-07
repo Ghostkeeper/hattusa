@@ -1668,12 +1668,16 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 		final Comparator<List<?>> comparatorListBySize = (a,b) -> (a.size() - b.size()); //Compares lists by their size.
 		final List<List<Vertex<V,A>>> vertexClassesBySizeMe = new ArrayList<>(vertexClassesMe.values()); //First get a list of all classes from the hash map.
 		vertexClassesBySizeMe.sort(comparatorListBySize); //Then sort this list by class size.
-		final List<List<Vertex<Object,Object>>> vertexClassesBySizeOther = new ArrayList<>(vertexClassesOther.values());
-		vertexClassesBySizeOther.sort(comparatorListBySize);
+		final List<List<Vertex<Object,Object>>> vertexClassesBySizeOther = new ArrayList<>(vertexClassesMe.size()); //Sort the corresponding classes in the same way.
+		for(final List<Vertex<V,A>> vertexClass : vertexClassesBySizeMe) {
+			vertexClassesBySizeOther.add(vertexClassMatchings.get(vertexClass));
+		}
 		final List<List<Arc<V,A>>> arcClassesBySizeMe = new ArrayList<>(arcClassesMe.values());
 		arcClassesBySizeMe.sort(comparatorListBySize);
-		final List<List<Arc<Object,Object>>> arcClassesBySizeOther = new ArrayList<>(arcClassesOther.values());
-		arcClassesBySizeOther.sort(comparatorListBySize);
+		final List<List<Arc<Object,Object>>> arcClassesBySizeOther = new ArrayList<>(arcClassesMe.size());
+		for(final List<Arc<V,A>> arcClass : arcClassesBySizeMe) {
+			arcClassesBySizeOther.add(arcClassMatchings.get(arcClass));
+		}
 
 		//Finally, the VF2 algorithm will do the actual matching. This part
 		//takes exponential time.
