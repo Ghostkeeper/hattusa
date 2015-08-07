@@ -490,9 +490,27 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 		return true;
 	}
 
+	/**
+	 * Returns a hash code for this graph. The hash code is guaranteed to be
+	 * equal to the hash codes for all graphs that are equal to this graph
+	 * according to the {@link #equals} method, but is not guaranteed to be
+	 * different to the hash codes of graphs that are not equal.
+	 * <p>In order to satisfy these requirements, an isomorphism-invariant hash
+	 * code is computed. The hash code is guaranteed to be equal to all graphs
+	 * that are isomorph with this graph.</p>
+	 * @return A hash code for this graph.
+	 */
 	@Override
 	public int hashCode() {
-		throw new UnsupportedOperationException("Not implemented yet.");
+		int vertexHash = 13; //Start with a prime.
+		for(final Vertex<V,A> vertex : vertices) {
+			vertexHash *= vertex.hashCode();
+		}
+		int arcHash = 31; //Start with a different prime in order to get orthogonal prime factorisations to minimise collisions.
+		for(final Arc<V,A> arc : arcs) {
+			arcHash *= arc.hashCode();
+		}
+		return vertexHash ^ arcHash; //An XOR to combine the two.
 	}
 
 	@Override
