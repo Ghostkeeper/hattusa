@@ -1716,7 +1716,7 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 		int indexOther = 0; //Current position in the current vertex or arc class of the other graph.
 		ADDMATCH:
 		while(!frontMe.isEmpty() || vertexClassIndex < vertexClassesBySizeMe.size()) { //Termination criterium for not finding a match: Front is empty and we've exhausted all starting points.
-			if((!frontMe.isEmpty() && frontOther.isEmpty()) || (frontMe.isEmpty() && !frontOther.isEmpty())) { //The two fronts are not in sync.
+			if(frontMe.size() != frontOther.size()) { //The two fronts are not in sync.
 				return null;
 			}
 			if(!frontMe.isEmpty()) { //Then also !frontOther.isEmpty(). There are arcs or vertices in the front. Process those first.
