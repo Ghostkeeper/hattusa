@@ -1672,12 +1672,6 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 		for(final List<Vertex<V,A>> vertexClass : vertexClassesBySizeMe) {
 			vertexClassesBySizeOther.add(vertexClassMatchings.get(vertexClass));
 		}
-		final List<List<Arc<V,A>>> arcClassesBySizeMe = new ArrayList<>(arcClassesMe.values());
-		arcClassesBySizeMe.sort(comparatorListBySize);
-		final List<List<Arc<Object,Object>>> arcClassesBySizeOther = new ArrayList<>(arcClassesMe.size());
-		for(final List<Arc<V,A>> arcClass : arcClassesBySizeMe) {
-			arcClassesBySizeOther.add(arcClassMatchings.get(arcClass));
-		}
 
 		//Finally, the VF2 algorithm will do the actual matching. This part
 		//takes exponential time.
