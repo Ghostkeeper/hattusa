@@ -2581,8 +2581,10 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 					Set<Vertex<V,A>> component = new IdentityHashSet<>(toDistribute.size() - potentials.size());
 					for(Vertex<V,A> connectedVertex = toDistribute.pop();connectedVertex != vertex;connectedVertex = toDistribute.pop()) { //All vertices above this vertex in the stack are in the component.
 						component.add(connectedVertex);
+						assignedVertices.add(connectedVertex);
 					}
 					component.add(vertex);
+					assignedVertices.add(vertex);
 					potentials.pop(); //Done with this component. Remove vertex.
 				}
 			}
