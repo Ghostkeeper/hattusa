@@ -460,9 +460,16 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 		return vertex.getLabel(); //Method call throws NullPointerException by itself if null.
 	}
 
+	/**
+	 * Computes whether or not the graph has a cycle. A cycle is a path through
+	 * the graph, following only arcs in their appropriate direction, that ends
+	 * in the same vertex as the one it starts in.
+	 * @return {@code true} if the graph has at least one cycle, or
+	 * {@code false} if there are no cycles.
+	 */
 	@Override
 	public boolean hasCycle() {
-		throw new UnsupportedOperationException("Not implemented yet.");
+
 	}
 
 	/**
@@ -2526,6 +2533,61 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 			}
 		}
 		return null; //Front is empty and we've exhausted all starting points, but no match.
+	}
+
+	/**
+	 * An implementation of Gabow's algorithm to find strongly connected
+	 * components. This implementation is based on Gabow's original paper titled
+	 * <i>Path-based Depth-first Search for Strong and Biconnected
+	 * Components</i>, but it has been made non-recursive to increase efficiency
+	 * in Java, and is transformed to work on all types of graphs that are meant
+	 * to be represented by this graph.
+	 * @return The set of strongly connected components of this graph, each
+	 * represented by a set of vertices.
+	 * @see #stronglyConnectedComponents()
+	 */
+	protected Set<Set<Vertex<V,A>>> stronglyConnectedComponentsGabow() {
+		final int estimatedComponentSize = net.dulek.math.Math.log2(numVertices()); //This estimate is based on the Erdös-Renyi results on random graphs.
+		final Set<Set<Vertex<V,A>>> result = new IdentityHashSet<>(numVertices() / estimatedComponentSize); //Resulting connected components.
+		final Map<Vertex<V,A>,Integer> preorderNumber = new IdentityHashMap<>(numVertices()); //Gives each vertex a pre-order number of the depth-first traversal. If the pre-order number is -1, it is not yet in a component.
+		final Set<Vertex<V,A>> assignedVertices = new IdentityHashSet<>(numVertices()); //The vertices that have already been put in a connected component.
+
+		for(final Vertex<V,A> startVertex : vertices) { //Start a depth-first search at each vertex (unless they are already belonging to a component).
+			if(preorderNumber.containsKey(startVertex)) { //Already in a component.
+				continue;
+			}
+			final Deque<Vertex<V,A>> todo = new ArrayDeque<>(numVertices()); //The main stack of the depth-first search, that keeps track of the nodes we've seen but not yet explored.
+			final Deque<Vertex<V,A>> toDistribute = new ArrayDeque<>(estimatedComponentSize); //Discovered vertices that haven't been put in a component yet.
+			final Deque<Vertex<V,A>> potentials = new ArrayDeque<>(estimatedComponentSize); //Vertices that might belong to different connected components.
+			int preorder = 0;
+			todo.push(startVertex);
+			while(!todo.isEmpty()) { //Depth-first search.
+				final Vertex<V,A> vertex = todo.pop();
+				preorderNumber.put(vertex,preorder++);
+				toDistribute.push(vertex); //We've explored this vertex now. Put it in both stacks.
+				potentials.push(vertex);
+				for(final Vertex<V,A> neighbour : vertex.adjacentVertices()) {
+					if(!preorderNumber.containsKey(neighbour)) { //Not yet discovered.
+						todo.push(neighbour);
+						//TODO: Properly "recurse"! Do I have to keep track of where we were situated in this neighbour list?
+					} else if(!assignedVertices.contains(neighbour)) { //Discovered, but not yet in a component.
+						final int neighbourPreorder = preorderNumber.get(neighbour);
+						while(preorderNumber.get(potentials.peek()) > neighbourPreorder) { //All of these are NOT in the connected component of vertex.
+							potentials.pop();
+						}
+					}
+				}
+				if(potentials.peek() == vertex) { //We've hit a loop.
+					Set<Vertex<V,A>> component = new IdentityHashSet<>(toDistribute.size() - potentials.size());
+					for(Vertex<V,A> connectedVertex = toDistribute.pop();connectedVertex != vertex;connectedVertex = toDistribute.pop()) { //All vertices above this vertex in the stack are in the component.
+						component.add(connectedVertex);
+					}
+					component.add(vertex);
+					potentials.pop(); //Done with this component. Remove vertex.
+				}
+			}
+		}
+		return result;
 	}
 
 	/**
