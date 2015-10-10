@@ -421,6 +421,7 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 	 * @param obj The object with which to compare.
 	 * @return {@code true} if this graph is equal to the specified object, or
 	 * {@code false} otherwise.
+	 * @see #isomorphismLuksVF2(net.dulek.collections.graph.arc.vertex.Graph)
 	 */
 	@Override
 	public boolean equals(Object obj) {
@@ -619,6 +620,7 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 	 * subgraph of it.
 	 * @return {@code true} if this graph is a subgraph of {@code other}, or
 	 * false otherwise.
+	 * @see #subgraphIsomorphismLuksVF2(net.dulek.collections.graph.arc.vertex.Graph)
 	 * @throws NullPointerException The specified graph is {@code null}.
 	 */
 	@Override
@@ -1291,6 +1293,8 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 	 * vertices of the other graph, and the second mapping arcs of this graph to
 	 * arcs of the other graph. These mappings represent the isomorphism. If no
 	 * isomorphism could be found {@code null} is returned.
+	 * @see #equals(java.lang.Object)
+	 * @see #subgraphIsomorphismLuksVF2(net.dulek.collections.graph.arc.vertex.Graph)
 	 * @throws NullPointerException The specified graph is {@code null}.
 	 */
 	@SuppressWarnings("element-type-mismatch") //Due to data structures containing both arcs and vertices, and calling contains() on them.
@@ -2087,6 +2091,8 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 	 * vertices of the other graph, and the second mapping arcs of this graph to
 	 * arcs of the other graph. These mappings represent the isomorphism. If no
 	 * isomorphism could be found {@code null} is returned.
+	 * @see #isomorphismLuksVF2(net.dulek.collections.graph.arc.vertex.Graph)
+	 * @see #isSubgraphOf(net.dulek.collections.graph.Graph)
 	 * @throws NullPointerException The specified graph is {@code null}.
 	 */
 	@SuppressWarnings("element-type-mismatch") //Due to data structures containing both arcs and vertices, and calling contains() on them.
