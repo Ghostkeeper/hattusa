@@ -2586,6 +2586,7 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 					component.add(vertex);
 					assignedVertices.add(vertex);
 					potentials.pop(); //Done with this component. Remove vertex.
+					result.add(component);
 				}
 			}
 		}
