@@ -1324,9 +1324,51 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 		return result;
 	}
 
+	/**
+	 * Returns the weakly connected components of this graph. The weakly
+	 * connected components are the maximal subsets of vertices of the graph
+	 * such that in the subgraph induced by them, every pair of vertices
+	 * {@code u} and {@code v} would be connected by a path from {@code u} to
+	 * {@code v} and from {@code v} to {@code u} if all arcs would be replaced
+	 * by undirected edges.
+	 * <p>Note that this may be different from the strongly connected
+	 * components, which are the maximal subsets of vertices of the graph such
+	 * that every pair of vertices {@code u} and {@code v} in the subgraph
+	 * induced by the subset is already connected by a path from {@code u} to
+	 * {@code v} and from {@code v} to {@code u}. In an undirected graph, the
+	 * two are equivalent.</p>
+	 * <p>The result is returned in the form of a set of weakly connected
+	 * components, where every weakly connected component is represented by a
+	 * set of vertices. All vertices must be contained in exactly one weakly
+	 * connected component.</p>
+	 * @return The weakly connected components of this graph.
+	 */
 	@Override
 	public Set<Set<? extends Vertex<V,A>>> weaklyConnectedComponents() {
-		throw new UnsupportedOperationException("Not implemented yet.");
+		final int estimatedComponentSize = numVertices() / Math.max(4,numVertices() - numArcs()); //An initial estimate for the number of components is based on the unlikely assumption that every arc connects exactly two previously unconnected components with each other.
+		final Set<Set<? extends Vertex<V,A>>> result = new IdentityHashSet<>(Math.max(4,numVertices() - numArcs()));
+		final Set<Vertex<V,A>> assignedVertices = new IdentityHashSet<>(numVertices()); //All vertices that are already assigned to a component.
+		for(final Vertex<V,A> startVertex : vertices) {
+			if(assignedVertices.contains(startVertex)) { //The vertex is already in a component.
+				continue;
+			}
+			final Set<Vertex<V,A>> component = new IdentityHashSet<>(estimatedComponentSize); //Make a new component for this vertex and its friends.
+			//Start a depth-first search from here.
+			final Deque<Vertex<V,A>> todo = new ArrayDeque<>(estimatedComponentSize); //This behaves as call stack.
+			todo.push(startVertex);
+			while(!todo.isEmpty()) {
+				final Vertex<V,A> vertex = todo.pop(); //Pick the next one from the stack.
+				component.add(vertex);
+				assignedVertices.add(vertex);
+				for(final Vertex<V,A> neighbour : vertex.adjacentVertices()) { //List the neighbouring vertices to be added.
+					if(!assignedVertices.contains(neighbour)) { //Only explore if they haven't already been added.
+						todo.push(neighbour);
+					}
+				}
+			}
+			result.add(component); //All connected vertices are explored. Time to add the component to the result.
+		}
+		return result;
 	}
 
 	/**
