@@ -645,6 +645,9 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 			}
 			for(final Vertex<V,A> vertex : arc.sourceEndpoints()) { //Need just 1 incident vertex, but this is the easiest way to get the first element from a set. This loop always breaks at the first iteration.
 				for(final Arc<V,A> reverseArc : vertex.incomingArcs()) { //Look at all arcs in the other direction to see if one is exactly the reverse of this arc.
+					if(matchedArcs.contains(reverseArc)) { //Already matched. Can't match again with this one.
+						continue;
+					}
 					if(reverseArc.sourceEndpoints().equals(arc.destinationEndpoints()) && reverseArc.destinationEndpoints().equals(arc.sourceEndpoints())) { //Exactly reverse! Note: This only works properly if the source and destination sets are IdentityHashSets, otherwise Vertex.equals might get invoked.
 						matchedArcs.add(reverseArc); //Don't need to check that arc again.
 						continue CHECKALLARCS; //Found a match, so no need to keep searching.
@@ -654,6 +657,9 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 			}
 			for(final Vertex<V,A> vertex : arc.destinationEndpoints()) { //Normally the first for-loop prevents this loop from executing, but in the case of halfarcs the source may have been empty and we still need to find at least one vertex.
 				for(final Arc<V,A> reverseArc : vertex.outgoingArcs()) { //Look at all arcs in the other direction to see if one is exactly the reverse of this arc.
+					if(matchedArcs.contains(reverseArc)) { //Already matched. Can't match again with this one.
+						continue;
+					}
 					if(reverseArc.sourceEndpoints().equals(arc.destinationEndpoints()) && reverseArc.destinationEndpoints().equals(arc.sourceEndpoints())) { //Exactly reverse! Note: This only works properly if the source and destination sets are IdentityHashSets, otherwise Vertex.equals might get invoked.
 						matchedArcs.add(reverseArc); //Don't need to check that arc again.
 						continue CHECKALLARCS; //Found a match, so no need to keep searching.
