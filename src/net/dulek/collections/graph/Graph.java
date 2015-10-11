@@ -22,7 +22,6 @@
 
 package net.dulek.collections.graph;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Set;
 
@@ -97,7 +96,7 @@ import java.util.Set;
  * uniquely identifies an arc.
  * @version 1.0
  */
-public interface Graph<V,A> extends Cloneable,Serializable {
+public interface Graph<V,A> extends Cloneable {
 	/**
 	 * Creates a new arc that connects the vertices in {@code from} to the
 	 * vertices in {@code to}. The newly added arc will be returned.
