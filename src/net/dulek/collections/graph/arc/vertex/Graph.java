@@ -2555,11 +2555,11 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 	protected Set<Set<Vertex<V,A>>> stronglyConnectedComponentsGabow() {
 		final int estimatedComponentSize = net.dulek.math.Math.log2(numVertices()); //This estimate is based on the Erdös-Renyi results on random graphs.
 		final Set<Set<Vertex<V,A>>> result = new IdentityHashSet<>(numVertices() / estimatedComponentSize); //Resulting connected components.
-		final Map<Vertex<V,A>,Integer> preorderNumber = new IdentityHashMap<>(numVertices()); //Gives each vertex a pre-order number of the depth-first traversal. If the pre-order number is -1, it is not yet in a component.
+		final Map<Vertex<V,A>,Integer> preorderIndex = new IdentityHashMap<>(numVertices()); //Gives each vertex a pre-order number of the depth-first traversal. If the pre-order number is -1, it is not yet in a component.
 		final Set<Vertex<V,A>> assignedVertices = new IdentityHashSet<>(numVertices()); //The vertices that have already been put in a connected component.
 
 		for(final Vertex<V,A> startVertex : vertices) { //Start a depth-first search at each vertex (unless they are already belonging to a component).
-			if(preorderNumber.containsKey(startVertex)) { //Already in a component.
+			if(preorderIndex.containsKey(startVertex)) { //Already in a component.
 				continue;
 			}
 			final Deque<Vertex<V,A>> todo = new ArrayDeque<>(numVertices()); //The main stack of the depth-first search, that keeps track of the nodes we've seen but not yet explored.
@@ -2569,16 +2569,16 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 			todo.push(startVertex);
 			while(!todo.isEmpty()) { //Depth-first search.
 				final Vertex<V,A> vertex = todo.pop();
-				preorderNumber.put(vertex,preorder++);
+				preorderIndex.put(vertex,preorder++);
 				toDistribute.push(vertex); //We've explored this vertex now. Put it in both stacks.
 				potentials.push(vertex);
 				for(final Vertex<V,A> neighbour : vertex.adjacentVertices()) {
-					if(!preorderNumber.containsKey(neighbour)) { //Not yet discovered.
+					if(!preorderIndex.containsKey(neighbour)) { //Not yet discovered.
 						todo.push(neighbour);
 						//TODO: Properly "recurse"! Do I have to keep track of where we were situated in this neighbour list?
 					} else if(!assignedVertices.contains(neighbour)) { //Discovered, but not yet in a component.
-						final int neighbourPreorder = preorderNumber.get(neighbour);
-						while(preorderNumber.get(potentials.peek()) > neighbourPreorder) { //All of these are NOT in the connected component of vertex.
+						final int neighbourPreorder = preorderIndex.get(neighbour);
+						while(preorderIndex.get(potentials.peek()) > neighbourPreorder) { //All of these are NOT in the connected component of vertex.
 							potentials.pop();
 						}
 					}
