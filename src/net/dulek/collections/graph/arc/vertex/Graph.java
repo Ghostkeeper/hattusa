@@ -2874,6 +2874,64 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 	}
 
 	/**
+	 * Validates this graph, checking if its state is correct. This is intended
+	 * to be called at deserialisation. It is also useful for debugging the
+	 * graph implementations. The rest of the graph implementation may depend on
+	 * the graph being valid. This function may only be called at a time when
+	 * being invalid is an error. Therefore, this method throws an
+	 * {@link IllegalStateException} when the graph is invalid.
+	 * <p>This method must check if all restrictions imposed on the graph are
+	 * met.</p>
+	 * @throws IllegalStateException The graph is invalid at this time.
+	 */
+	protected void validate() throws IllegalStateException {
+		if(vertices == null) {
+			throw new IllegalStateException("The set of vertices of this graph is null.");
+		}
+		if(arcs == null) {
+			throw new IllegalStateException("The set of arcs of this graph is null.");
+		}
+		for(final Vertex<V,A> vertex : vertices) {
+			//Check if the vertices set doesn't contain null-elements.
+			if(vertex == null) {
+				throw new IllegalStateException("The set of vertices contained a null-element.");
+			}
+			//Check if all incoming and outgoing connections of all vertices are reciprocated.
+			for(final Arc<V,A> incomingArc : vertex.incomingArcs()) {
+				if(!incomingArc.destinationEndpoints().contains(vertex)) {
+					throw new IllegalStateException("A vertex was connected to an incoming arc but the arc had the vertex not in its destination.");
+				}
+			}
+			for(final Arc<V,A> outgoingArc : vertex.outgoingArcs()) {
+				if(!outgoingArc.sourceEndpoints().contains(vertex)) {
+					throw new IllegalStateException("A vertex was connected to an outgoing arc but the arc had the vertex not in its source.");
+				}
+			}
+		}
+		for(final Arc<V,A> arc : arcs) {
+			//Check if the arcs set doesn't contain null-elements.
+			if(arc == null) {
+				throw new IllegalStateException("The set of arcs contained a null-element.");
+			}
+			//Check if all source and destination connections of all arcs are reciprocated.
+			for(final Vertex<V,A> sourceVertex : arc.sourceEndpoints()) {
+				if(!sourceVertex.outgoingArcs().contains(arc)) {
+					throw new IllegalStateException("An arc was connected to a source vertex but the vertex had the arc not in its outgoing arcs.");
+				}
+			}
+			for(final Vertex<V,A> destinationVertex : arc.destinationEndpoints()) {
+				if(!destinationVertex.incomingArcs().contains(arc)) {
+					throw new IllegalStateException("An arc was connected to a destination vertex but the vertex had the arc not in its incoming arcs.");
+				}
+			}
+			//Check if all arcs are connected to at least one vertex, either in its source or in its destination.
+			if(arc.sourceEndpoints().isEmpty() && arc.destinationEndpoints().isEmpty()) {
+				throw new IllegalStateException("An arc exists that is not connected to any vertex.");
+			}
+		}
+	}
+
+	/**
 	 * This set contains the arcs in a graph. It is returned by the
 	 * {@link #arcs()} method. This implementation ensures that modifying the
 	 * arc set will modify the accompanying graph accordingly.
