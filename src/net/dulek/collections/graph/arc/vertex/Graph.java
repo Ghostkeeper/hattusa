@@ -701,7 +701,26 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 
 	@Override
 	public boolean isMulti() {
-		throw new UnsupportedOperationException("Not implemented yet.");
+		CHECKALLARCS:
+		for(final Arc<V,A> arc : arcs) {
+			for(final Vertex<V,A> vertex : arc.sourceEndpoints()) { //Need just 1 incident vertex, but this is the easiest way to get the first element from a set. This loop always breaks at the first iteration.
+				for(final Arc<V,A> duplicateArc : vertex.outgoingArcs()) { //Look at all arcs in the same direction to see if one is an exact duplicate of this arc.
+					if(duplicateArc.sourceEndpoints().equals(arc.sourceEndpoints()) && duplicateArc.destinationEndpoints().equals(arc.destinationEndpoints())) { //Exactly the same! Note: This only works properly if the source and destination sets are IdentityHashSets, otherwise Vertex.equals might get invoked.
+						return true; //The arc is multi, so the graph is also multi.
+					}
+				}
+				continue CHECKALLARCS; //The arc is not multi.
+			}
+			for(final Vertex<V,A> vertex : arc.destinationEndpoints()) { //Normally the first for-loop prevents this loop from executing, but in the case of halfarcs the source may have been empty and we still need to find at least one vertex.
+				for(final Arc<V,A> duplicateArc : vertex.incomingArcs()) { //Look at all arcs in the same direction to see if one is an exact duplicate of this arc.
+					if(duplicateArc.sourceEndpoints().equals(arc.sourceEndpoints()) && duplicateArc.destinationEndpoints().equals(arc.destinationEndpoints())) { //Exactly the same! Note: This only works properly if the source and destination sets are IdentityHashSets, otherwise Vertex.equals might get invoked.
+						return true; //The arc is multi, so the graph is also multi.
+					}
+				}
+				continue CHECKALLARCS; //The arc is not multi.
+			}
+		}
+		return false; //No multiarc was found, so the graph is single.
 	}
 
 	/**
