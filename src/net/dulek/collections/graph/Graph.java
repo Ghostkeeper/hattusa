@@ -274,7 +274,7 @@ public interface Graph<V,A> extends Cloneable,Serializable {
 	/**
 	 * Returns whether or not this graph has at least one reflexive arc. A
 	 * reflexive arc is an arc in which the source has at least one vertex in
-	 * common with the destination. Undirected arcs (edges) cannot be reflexive.
+	 * common with the destination.
 	 * @return {@code true} if the graph has at least one reflexive arc, or
 	 * {@code false} if it has no reflexive arcs.
 	 */
