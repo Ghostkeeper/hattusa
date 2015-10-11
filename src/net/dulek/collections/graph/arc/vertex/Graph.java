@@ -535,8 +535,16 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 		return false; //None of the arcs have null on them.
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public boolean hasNullOnVertices() {
-		throw new UnsupportedOperationException("Not implemented yet.");
+		for(final Vertex<V,A> vertex : vertices) {
+			if(vertex.getLabel() == null) { //Found one!
+				return true;
+			}
+		}
+		return false; //None of the vertices have null on them.
 	}
 
 	@Override
