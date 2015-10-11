@@ -331,7 +331,9 @@ public interface Graph<V,A> extends Cloneable,Serializable {
 	 * Returns whether or not the graph is a directed graph. The graph is a
 	 * directed graph if for any arc going from source vertices {@code A} to
 	 * destination vertices {@code B}, there is no arc going from {@code B} to
-	 * {@code A}.
+	 * {@code A}. In the case of multigraphs, if multiple arcs are identical,
+	 * then there must be an equal number of arcs going in the opposite
+	 * direction for the arc to remain undirected.
 	 * @return {@code true} if the graph is a directed graph, or {@code false}
 	 * if it is an undirected graph.
 	 */
