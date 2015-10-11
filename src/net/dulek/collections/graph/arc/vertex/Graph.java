@@ -522,9 +522,17 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 		return vertexHash ^ arcHash; //An XOR to combine the two.
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean hasNullOnArcs() {
-		throw new UnsupportedOperationException("Not implemented yet.");
+		for(final Arc<V,A> arc : arcs) {
+			if(arc.getLabel() == null) { //Found one!
+				return true;
+			}
+		}
+		return false; //None of the arcs have null on them.
 	}
 
 	public boolean hasNullOnVertices() {
