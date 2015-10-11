@@ -679,9 +679,18 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 		return false; //Only if none of the arcs are half, the graph isn't either.
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * @return {@inheritDoc}
+	 */
 	@Override
 	public boolean isHyper() {
-		throw new UnsupportedOperationException("Not implemented yet.");
+		for(final Arc<V,A> arc : arcs) {
+			if(arc.sourceEndpoints().size() > 1 || arc.destinationEndpoints().size() > 1) { //An arc is a hyperarc if it has more than one vertex in its source or destination.
+				return true; //If it has a hyperarc, the graph is a hypergraph.
+			}
+		}
+		return false; //Only if the graph has no hyperarcs at all is it not a hypergraph.
 	}
 
 	@Override
