@@ -515,6 +515,7 @@ public interface Graph<V,A> extends Cloneable {
 	 * set. All vertices must be contained in exactly one strongly connected
 	 * component.</p>
 	 * @return The strongly connected components of this graph.
+	 * @see #weaklyConnectedComponents()
 	 */
 	Set<Set<? extends V>> stronglyConnectedComponents();
 
@@ -565,6 +566,7 @@ public interface Graph<V,A> extends Cloneable {
 	 * set. All vertices must be contained in exactly one weakly connected
 	 * component.</p>
 	 * @return The weakly connected components of this graph.
+	 * @see #stronglyConnectedComponents()
 	 */
 	Set<Set<? extends V>> weaklyConnectedComponents();
 }
