@@ -1267,6 +1267,79 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 	}
 
 	/**
+	 * An implementation of Gabow's algorithm to find whether the graph has a
+	 * cycle. This implementation is based on Gabow's original paper titled
+	 * <i>Path-based Depth-first Search for Strong and Biconnected
+	 * Components</i>, but it has been made non-recursive to increase efficiency
+	 * in Java, and is transformed to work on all types of graphs that are meant
+	 * to be represented by this graph.
+	 * <p>This implementation is identical to the
+	 * {@link #stronglyConnectedComponentsGabow()} method, except that it
+	 * terminates early when a component has been found with a size larger than
+	 * one, in which case the graph has a cycle. This also lets the algorithm
+	 * forego some data structures that would otherwise be used to store the
+	 * result.</p>
+	 * @return {@code true} if the graph has a cycle, or {@code false} if it
+	 * doesn't.
+	 * @see #hasCycle()
+	 * @see #stronglyConnectedComponentsGabow()
+	 * @see GabowAction
+	 */
+	protected boolean hasCycleGabow() {
+		final int estimatedComponentSize = net.dulek.math.Math.log2(numVertices()); //This estimate is based on the Erdös-Renyi results on random graphs.
+		final Map<Vertex<V,A>,Integer> preorderIndex = new IdentityHashMap<>(numVertices()); //Gives each vertex a pre-order number of the depth-first traversal. If the pre-order number is -1, it is not yet in a component.
+		final Set<Vertex<V,A>> assignedVertices = new IdentityHashSet<>(numVertices()); //The vertices that have already been put in a connected component.
+
+		for(final Vertex<V,A> startVertex : vertices) { //Start a depth-first search at each vertex (unless they are already belonging to a component).
+			if(preorderIndex.containsKey(startVertex)) { //Already in a component.
+				continue;
+			}
+			final Deque<Vertex<V,A>> todo = new ArrayDeque<>(numVertices()); //The main stack of the depth-first search, that keeps track of the nodes we've seen but not yet explored.
+			final Deque<GabowAction> todoAction = new ArrayDeque<>(numVertices()); //There are two actions that can be performed on a vertex. This keeps tracks of which action is to be performed.
+			final Deque<Vertex<V,A>> candidates = new ArrayDeque<>(estimatedComponentSize); //Discovered vertices that haven't been put in a component yet.
+			final Deque<Vertex<V,A>> boundary = new ArrayDeque<>(estimatedComponentSize); //Vertices on the boundaries between components.
+			int preorder = 0;
+			todo.push(startVertex);
+			todoAction.push(GabowAction.EXPLORE);
+			while(!todo.isEmpty()) { //Depth-first search.
+				final Vertex<V,A> vertex = todo.pop();
+				final GabowAction action = todoAction.pop();
+				switch(action) {
+					case EXPLORE: { //The vertex must be explored.
+						preorderIndex.put(vertex,preorder++);
+						candidates.push(vertex); //We've explored this vertex now. Put it in both stacks.
+						boundary.push(vertex);
+						todo.push(vertex);
+						todoAction.push(GabowAction.STORE); //When the subtree is explored, store this as a connected component.
+						for(final Vertex<V,A> neighbour : vertex.adjacentVertices()) {
+							if(!preorderIndex.containsKey(neighbour)) { //Not yet explored.
+								todo.push(neighbour); //Then go on with this subtree.
+								todoAction.push(GabowAction.EXPLORE);
+							} else if(!assignedVertices.contains(neighbour)) { //Discovered, but not yet in a component.
+								final int neighbourPreorder = preorderIndex.get(neighbour);
+								while(preorderIndex.get(boundary.peek()) > neighbourPreorder) { //All of these are NOT in the connected component of vertex.
+									boundary.pop();
+								}
+							}
+						}
+						break;
+					}
+					case STORE: { //The vertex is already fully explored earlier and must now be stored as a connected component.
+						if(boundary.peek() == vertex) { //We've hit a loop.
+							if(candidates.peek() != vertex) { //There are more than one vertices in this connected component.
+								return true; //We've found a cycle then!
+							}
+							assignedVertices.add(vertex);
+							boundary.pop(); //Done with this component. Remove vertex.
+						}
+					}
+				}
+			}
+		}
+		return false; //No connected component exists with size larger than 1, so the graph has no cycle.
+	}
+
+	/**
 	 * An implementation of graph isomorphism that uses a combination of Luks'
 	 * algorithm and the well-known VF2 algorithm. This algorithm attempts to
 	 * find an isomorphism between this graph and the specified graph. If at
