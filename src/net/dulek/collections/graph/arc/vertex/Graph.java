@@ -2565,8 +2565,8 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 			}
 			final Deque<Vertex<V,A>> todo = new ArrayDeque<>(numVertices()); //The main stack of the depth-first search, that keeps track of the nodes we've seen but not yet explored.
 			final Deque<GabowAction> todoAction = new ArrayDeque<>(numVertices()); //There are two actions that can be performed on a vertex. This keeps tracks of which action is to be performed.
-			final Deque<Vertex<V,A>> toDistribute = new ArrayDeque<>(estimatedComponentSize); //Discovered vertices that haven't been put in a component yet.
-			final Deque<Vertex<V,A>> potentials = new ArrayDeque<>(estimatedComponentSize); //Vertices that might belong to different connected components.
+			final Deque<Vertex<V,A>> candidates = new ArrayDeque<>(estimatedComponentSize); //Discovered vertices that haven't been put in a component yet.
+			final Deque<Vertex<V,A>> boundary = new ArrayDeque<>(estimatedComponentSize); //Vertices on the boundaries between components.
 			int preorder = 0;
 			todo.push(startVertex);
 			todoAction.push(GabowAction.EXPLORE);
@@ -2576,8 +2576,8 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 				switch(action) {
 					case EXPLORE: { //The vertex must be explored.
 						preorderIndex.put(vertex,preorder++);
-						toDistribute.push(vertex); //We've explored this vertex now. Put it in both stacks.
-						potentials.push(vertex);
+						candidates.push(vertex); //We've explored this vertex now. Put it in both stacks.
+						boundary.push(vertex);
 						todo.push(vertex);
 						todoAction.push(GabowAction.STORE); //When the subtree is explored, store this as a connected component.
 						for(final Vertex<V,A> neighbour : vertex.adjacentVertices()) {
@@ -2586,23 +2586,23 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 								todoAction.push(GabowAction.EXPLORE);
 							} else if(!assignedVertices.contains(neighbour)) { //Discovered, but not yet in a component.
 								final int neighbourPreorder = preorderIndex.get(neighbour);
-								while(preorderIndex.get(potentials.peek()) > neighbourPreorder) { //All of these are NOT in the connected component of vertex.
-									potentials.pop();
+								while(preorderIndex.get(boundary.peek()) > neighbourPreorder) { //All of these are NOT in the connected component of vertex.
+									boundary.pop();
 								}
 							}
 						}
 						break;
 					}
 					case STORE: { //The vertex is already fully explored earlier and must now be stored as a connected component.
-						if(potentials.peek() == vertex) { //We've hit a loop.
-							final Set<Vertex<V,A>> component = new IdentityHashSet<>(toDistribute.size() - potentials.size());
-							for(Vertex<V,A> connectedVertex = toDistribute.pop();connectedVertex != vertex;connectedVertex = toDistribute.pop()) { //All vertices above this vertex in the stack are in the component.
+						if(boundary.peek() == vertex) { //We've hit a loop.
+							final Set<Vertex<V,A>> component = new IdentityHashSet<>(candidates.size() - boundary.size());
+							for(Vertex<V,A> connectedVertex = candidates.pop();connectedVertex != vertex;connectedVertex = candidates.pop()) { //All vertices above this vertex in the stack are in the component.
 								component.add(connectedVertex);
 								assignedVertices.add(connectedVertex);
 							}
 							component.add(vertex);
 							assignedVertices.add(vertex);
-							potentials.pop(); //Done with this component. Remove vertex.
+							boundary.pop(); //Done with this component. Remove vertex.
 							result.add(component);
 						}
 					}
