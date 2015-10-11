@@ -699,6 +699,10 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 		return false; //Only if the graph has no hyperarcs at all is it not a hypergraph.
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * @return {@inheritDoc}
+	 */
 	@Override
 	public boolean isMulti() {
 		CHECKALLARCS:
