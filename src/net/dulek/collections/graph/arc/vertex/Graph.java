@@ -524,6 +524,7 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 
 	/**
 	 * {@inheritDoc}
+	 * @return {@inheritDoc}
 	 */
 	@Override
 	public boolean hasNullOnArcs() {
@@ -537,6 +538,7 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 
 	/**
 	 * {@inheritDoc}
+	 * @return {@inheritDoc}
 	 */
 	public boolean hasNullOnVertices() {
 		for(final Vertex<V,A> vertex : vertices) {
