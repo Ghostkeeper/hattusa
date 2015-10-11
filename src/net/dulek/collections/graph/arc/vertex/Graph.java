@@ -1102,6 +1102,24 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 		return arc.sourceEndpoints();
 	}
 
+	/**
+	 * Returns the strongly connected components of this graph. The strongly
+	 * connected components are the maximal subsets of vertices of the graph
+	 * such that in the subgraph induced by them, every pair of vertices
+	 * {@code u} and {@code v} is connected by a path from {@code u} to
+	 * {@code v} and from {@code v} to {@code u}.
+	 * <p>Note that this may be different from the weakly connected components,
+	 * which are the maximal subsets of vertices of the graph such that every
+	 * pair of vertices {@code u} and {@code v} would be connected by a path
+	 * from {@code u} to {@code v} and from {@code v} to {@code u} if all arcs
+	 * would be replaced by undirected edges. In an undirected graph, the two
+	 * are equivalent.</p>
+	 * <p>The result is returned in the form of a set of strongly connected
+	 * components, where every strongly connected component is represented by a
+	 * set of vertices. All vertices must be contained in exactly one strongly
+	 * connected component.</p>
+	 * @return The strongly connected components of this graph.
+	 */
 	@Override
 	public Set<Set<? extends Vertex<V,A>>> stronglyConnectedComponents() {
 		//Choose the best implementation based on the telemetry tests.

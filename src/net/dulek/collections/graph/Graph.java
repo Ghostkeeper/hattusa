@@ -236,8 +236,7 @@ public interface Graph<V,A> extends Cloneable,Serializable {
 	/**
 	 * Computes whether or not the graph has a cycle. A cycle is a path through
 	 * the graph, following only arcs in their appropriate direction, that ends
-	 * in the same vertex as the one it starts in. A graph could be represented
-	 * by a forest if it has no cycles.
+	 * in the same vertex as the one it starts in.
 	 * @return {@code true} if the graph has at least one cycle, or
 	 * {@code false} if there are no cycles.
 	 */
@@ -506,9 +505,9 @@ public interface Graph<V,A> extends Cloneable,Serializable {
 	 * <p>Note that this may be different from the weakly connected components,
 	 * which are the maximal subsets of vertices of the graph such that every
 	 * pair of vertices {@code u} and {@code v} would be connected by a path
-	 * from {@code u} to {@code v} and from {@code v} to {@code u} only if all
-	 * arcs would be replaced by undirected edges. In an undirected graph, the
-	 * two are equivalent.</p>
+	 * from {@code u} to {@code v} and from {@code v} to {@code u} if all arcs
+	 * would be replaced by undirected edges. In an undirected graph, the two
+	 * are equivalent.</p>
 	 * <p>The result is returned in the form of a set of strongly connected
 	 * components, where every strongly connected component is represented by a
 	 * set of vertices. If the graph has no vertices, the result is an empty
