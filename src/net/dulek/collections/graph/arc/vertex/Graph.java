@@ -1245,6 +1245,7 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 	 * set of vertices. All vertices must be contained in exactly one strongly
 	 * connected component.</p>
 	 * @return The strongly connected components of this graph.
+	 * @see #weaklyConnectedComponents()
 	 */
 	@Override
 	public Set<Set<? extends Vertex<V,A>>> stronglyConnectedComponents() {
@@ -1353,6 +1354,7 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 	 * set of vertices. All vertices must be contained in exactly one weakly
 	 * connected component.</p>
 	 * @return The weakly connected components of this graph.
+	 * @see #stronglyConnectedComponents()
 	 */
 	@Override
 	public Set<Set<? extends Vertex<V,A>>> weaklyConnectedComponents() {
