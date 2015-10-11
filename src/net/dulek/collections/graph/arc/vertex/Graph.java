@@ -434,8 +434,8 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 		@SuppressWarnings("unchecked") //Casting to Object will always succeed. It is known to be a graph due to the instanceof check earlier.
 		final Graph<Object,Object> graph = (Graph)obj;
 
-		//Choose the best implementation based on the telemetry of the graphs.
-		return isomorphismLuksVF2(graph) != null; //There is currently only one implementation, so always choose this...
+		//Choose the best implementation based on the telemetry tests.
+		return isomorphismLuksVF2(graph) != null; //There is currently only one implementation, so always choose this one...
 	}
 
 	/**
@@ -470,7 +470,8 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 	 */
 	@Override
 	public boolean hasCycle() {
-
+		//Choose the best implementation based on the telemetry tests.
+		return hasCycleGabow(); //There is currently only one implementation, so always choose this one...
 	}
 
 	/**
@@ -1103,7 +1104,8 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 
 	@Override
 	public Set<Set<? extends Vertex<V,A>>> stronglyConnectedComponents() {
-		throw new UnsupportedOperationException("Not implemented yet.");
+		//Choose the best implementation based on the telemetry tests.
+		return stronglyConnectedComponentsGabow(); //There is currently only one implementation, so always choose this one.
 	}
 
 	/**
@@ -2626,9 +2628,9 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 	 * @see #stronglyConnectedComponents()
 	 * @see GabowAction
 	 */
-	protected Set<Set<Vertex<V,A>>> stronglyConnectedComponentsGabow() {
+	protected Set<Set<? extends Vertex<V,A>>> stronglyConnectedComponentsGabow() {
 		final int estimatedComponentSize = net.dulek.math.Math.log2(numVertices()); //This estimate is based on the Erdös-Renyi results on random graphs.
-		final Set<Set<Vertex<V,A>>> result = new IdentityHashSet<>(numVertices() / estimatedComponentSize); //Resulting connected components.
+		final Set<Set<? extends Vertex<V,A>>> result = new IdentityHashSet<>(numVertices() / estimatedComponentSize); //Resulting connected components.
 		final Map<Vertex<V,A>,Integer> preorderIndex = new IdentityHashMap<>(numVertices()); //Gives each vertex a pre-order number of the depth-first traversal. If the pre-order number is -1, it is not yet in a component.
 		final Set<Vertex<V,A>> assignedVertices = new IdentityHashSet<>(numVertices()); //The vertices that have already been put in a connected component.
 
