@@ -631,9 +631,38 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 		return vertex.canReach(other); //Method throws NullPointerException by itself if either is null.
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * @return {@inheritDoc}
+	 */
 	@Override
 	public boolean isDirected() {
-		throw new UnsupportedOperationException("Not implemented yet.");
+		final Set<Arc<V,A>> matchedArcs = new IdentityHashSet<>(numArcs() >> 1); //Keep track of arcs that are already matched with an arc in the other direction. No need to track which arc they are maxed with. Just need to skip these.
+		CHECKALLARCS:
+		for(final Arc<V,A> arc : arcs) {
+			if(matchedArcs.contains(arc)) { //Already matched with some other arc.
+				continue;
+			}
+			for(final Vertex<V,A> vertex : arc.sourceEndpoints()) { //Need just 1 incident vertex, but this is the easiest way to get the first element from a set. This loop always breaks at the first iteration.
+				for(final Arc<V,A> reverseArc : vertex.incomingArcs()) { //Look at all arcs in the other direction to see if one is exactly the reverse of this arc.
+					if(reverseArc.sourceEndpoints().equals(arc.destinationEndpoints()) && reverseArc.destinationEndpoints().equals(arc.sourceEndpoints())) { //Exactly reverse! Note: This only works properly if the source and destination sets are IdentityHashSets, otherwise Vertex.equals might get invoked.
+						matchedArcs.add(reverseArc); //Don't need to check that arc again.
+						continue CHECKALLARCS; //Found a match, so no need to keep searching.
+					}
+				}
+				return true; //No reverse arc was found. The graph is directed.
+			}
+			for(final Vertex<V,A> vertex : arc.destinationEndpoints()) { //Normally the first for-loop prevents this loop from executing, but in the case of halfarcs the source may have been empty and we still need to find at least one vertex.
+				for(final Arc<V,A> reverseArc : vertex.outgoingArcs()) { //Look at all arcs in the other direction to see if one is exactly the reverse of this arc.
+					if(reverseArc.sourceEndpoints().equals(arc.destinationEndpoints()) && reverseArc.destinationEndpoints().equals(arc.sourceEndpoints())) { //Exactly reverse! Note: This only works properly if the source and destination sets are IdentityHashSets, otherwise Vertex.equals might get invoked.
+						matchedArcs.add(reverseArc); //Don't need to check that arc again.
+						continue CHECKALLARCS; //Found a match, so no need to keep searching.
+					}
+				}
+				return true;
+			}
+		}
+		return false; //The graph is only undirected if all arcs are undirected.
 	}
 
 	@Override
