@@ -2595,7 +2595,7 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 					}
 					case STORE: { //The vertex is already fully explored earlier and must now be stored as a connected component.
 						if(potentials.peek() == vertex) { //We've hit a loop.
-							Set<Vertex<V,A>> component = new IdentityHashSet<>(toDistribute.size() - potentials.size());
+							final Set<Vertex<V,A>> component = new IdentityHashSet<>(toDistribute.size() - potentials.size());
 							for(Vertex<V,A> connectedVertex = toDistribute.pop();connectedVertex != vertex;connectedVertex = toDistribute.pop()) { //All vertices above this vertex in the stack are in the component.
 								component.add(connectedVertex);
 								assignedVertices.add(connectedVertex);
