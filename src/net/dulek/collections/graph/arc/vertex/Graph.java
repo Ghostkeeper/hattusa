@@ -22,8 +22,19 @@
 
 package net.dulek.collections.graph.arc.vertex;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.ConcurrentModificationException;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import net.dulek.collections.HashSet;
 import net.dulek.collections.IdentityHashSet;
 import net.dulek.collections.Pair;
