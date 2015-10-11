@@ -665,9 +665,18 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 		return false; //The graph is only undirected if all arcs are undirected.
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * @return {@inheritDoc}
+	 */
 	@Override
 	public boolean isHalf() {
-		throw new UnsupportedOperationException("Not implemented yet.");
+		for(final Arc<V,A> arc : arcs) {
+			if(arc.sourceEndpoints().isEmpty() || arc.destinationEndpoints().isEmpty()) { //An arc is half if it has an empty source or destination.
+				return true; //And if an arc is half then the entire graph is half.
+			}
+		}
+		return false; //Only if none of the arcs are half, the graph isn't either.
 	}
 
 	@Override
