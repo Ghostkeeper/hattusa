@@ -549,9 +549,30 @@ public abstract class Graph<V,A> implements net.dulek.collections.graph.arc.Grap
 		return false; //None of the vertices have null on them.
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * @return {@inheritDoc}
+	 */
 	@Override
 	public boolean hasReflexiveArcs() {
-		throw new UnsupportedOperationException("Not implemented yet.");
+		for(final Arc<V,A> arc : arcs) {
+			final Set<Vertex<V,A>> source = arc.sourceEndpoints();
+			final Set<Vertex<V,A>> destination = arc.destinationEndpoints();
+			if(source.size() < destination.size()) { //Iterate over the smallest of these two sets for more speed.
+				for(final Vertex<V,A> vertex : source) {
+					if(destination.contains(vertex)) { //This arc has a vertex that is both in its source and in its destination. The arc is reflexive.
+						return true;
+					}
+				}
+			} else { //Destination is smaller.
+				for(final Vertex<V,A> vertex : destination) {
+					if(source.contains(vertex)) { //This arc has a vertex that is both in its source and in its destination. The arc is reflexive.
+						return true;
+					}
+				}
+			}
+		}
+		return false; //None of the arcs were reflexive.
 	}
 
 	/**
